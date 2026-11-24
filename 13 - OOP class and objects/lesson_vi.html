@@ -1,0 +1,1024 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><title>Section 13 Bài học (VI)</title><link rel="stylesheet" href="style.css"></head>
+<body><header><h1>📘 Section 13 – Lớp (Class) và Đối tượng (Object)</h1><a href="index.html">Trang chủ</a><a href="lesson_en.html">🇬🇧 English</a><a href="exercises_vi.html">Bài tập →</a></header>
+<div class="wrap"><nav>
+<a href="#t1">1. Khái niệm OOP</a><a href="#t2">2. Khai báo class & object</a><a href="#t3">3. Truy cập thành viên</a><a href="#t4">4. Phạm vi truy cập</a><a href="#t5">5. Cài đặt phương thức</a><a href="#t6">6. Constructor & destructor</a><a href="#t7">7. Constructor mặc định</a><a href="#t8">8. Nạp chồng constructor</a><a href="#t9">9. Danh sách khởi tạo</a><a href="#t10">10. Constructor ủy quyền</a><a href="#t11">11. Tham số mặc định</a><a href="#t12">12. Copy constructor</a><a href="#t13">13. Shallow vs deep copy</a><a href="#t14">14. Move constructor</a><a href="#t15">15. Con trỏ this</a><a href="#t16">16. const với class</a><a href="#t17">17. Thành viên static</a><a href="#t18">18. struct vs class</a><a href="#t19">19. friend</a><a href="#t20">20. Challenge: Movies</a><a href="#sum">Tổng kết</a>
+</nav><main>
+<div class="note">💡 Mẹo chạy code: các ví dụ đầy đủ dưới mỗi mục mặc định đã có <code>#include &lt;iostream&gt;</code>, <code>&lt;string&gt;</code>, <code>&lt;vector&gt;</code>, <code>&lt;utility&gt;</code> và <code>using namespace std;</code>.</div>
+
+<section id="t1"><h2>1. Các khái niệm Lập trình hướng đối tượng</h2>
+<p>Lập trình thủ tục tập trung vào <b>hàm</b>; dữ liệu được truyền qua lại riêng rẽ. Khi chương trình lớn dần, rất khó bảo trì. OOP mô hình hóa chương trình bằng <b>lớp</b> và <b>đối tượng</b>.</p>
+<ul><li><b>Class (lớp)</b>: bản thiết kế / kiểu dữ liệu do người dùng định nghĩa, gồm <i>thuộc tính</i> (dữ liệu) và <i>phương thức</i> (hàm). VD: <code>Account</code>, <code>Player</code>, <code>std::string</code>, <code>std::vector</code>.</li>
+<li><b>Object (đối tượng)</b>: một thể hiện cụ thể của lớp. <code>Account frank_account;</code></li>
+<li><b>Đóng gói (encapsulation)</b>: gom dữ liệu + thao tác vào một chỗ. <b>Che giấu thông tin</b>: giấu phần cài đặt, chỉ lộ ra giao diện (interface).</li>
+<li>Ngoài ra: tái sử dụng, kế thừa, đa hình (các section sau).</li></ul>
+<div class="ex">
+<div class="ex-title">▶ Ví dụ đầy đủ &amp; Output</div>
+<pre><code>class Account {
+public:
+    string name;
+    double balance;
+};
+
+int main() {
+    Account frank;  frank.name = "Frank";  frank.balance = 100;
+    Account jim;    jim.name = "Jim";      jim.balance = 2500;
+    cout &lt;&lt; frank.name &lt;&lt; ": " &lt;&lt; frank.balance &lt;&lt; endl;
+    cout &lt;&lt; jim.name &lt;&lt; ": " &lt;&lt; jim.balance &lt;&lt; endl;
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Frank: 100
+Jim: 2500</pre>
+<p class="ex-why"><b>Giải thích:</b> Một class <code>Account</code> nhưng tạo được nhiều object độc lập — mỗi object giữ dữ liệu riêng của nó.</p>
+</div></section>
+
+<section id="t2"><h2>2. Khai báo class và tạo object</h2>
+<pre><code>class Player {
+    // thuộc tính
+    std::string name {"Player"};
+    int health {100};
+    int xp {3};
+    // phương thức
+    void talk(std::string);
+    bool is_dead();
+};   // ← nhớ dấu chấm phẩy!
+
+Player frank;                 // object trên stack
+Player players[] {frank, hero};   // mảng object
+std::vector&lt;Player&gt; vec {frank};
+Player *enemy = new Player;   // object trên heap
+delete enemy;</code></pre>
+<div class="note">Class chỉ là kiểu; chưa có bộ nhớ nào được cấp cho đến khi bạn tạo object.</div>
+<h3>Bẫy khi khởi tạo bằng <code>{}</code> và <code>()</code></h3>
+<pre><code>std::vector&lt;int&gt; a (10);   // 10 phần tử, đều = 0
+std::vector&lt;int&gt; b {10};   // 1 phần tử = 10  (ưu tiên initializer_list!)
+int x {3.7};               // ❌ lỗi: {} cấm thu hẹp kiểu (narrowing)
+int y (3.7);               // biên dịch được, y = 3 (mất dữ liệu)
+
+struct Point { int x; int y; };    // aggregate: không ctor, toàn public
+Point p {1, 2};
+Point q {.x = 1, .y = 2};          // designated initializer (C++20)</code></pre>
+<div class="note">Mặc định dùng <code>{}</code> (an toàn hơn), trừ khi lớp có constructor nhận <code>std::initializer_list</code> và bạn muốn gọi constructor khác.</div>
+<div class="ex">
+<div class="ex-title">▶ Ví dụ đầy đủ &amp; Output</div>
+<pre><code>class Player {
+public:
+    string name {"Player"};
+    int health {100};
+};
+
+int main() {
+    Player frank;                      // stack
+    Player *enemy = new Player;        // heap
+    vector&lt;Player&gt; team {frank, *enemy};
+    cout &lt;&lt; frank.name &lt;&lt; " " &lt;&lt; frank.health &lt;&lt; endl;
+    cout &lt;&lt; "Team size: " &lt;&lt; team.size() &lt;&lt; endl;
+    delete enemy;
+
+    vector&lt;int&gt; a (10), b {10};
+    cout &lt;&lt; a.size() &lt;&lt; " " &lt;&lt; b.size() &lt;&lt; endl;
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Player 100
+Team size: 2
+10 1</pre>
+<p class="ex-why"><b>Giải thích:</b> Object có thể nằm trên stack, heap hoặc trong vector. Dòng cuối minh họa bẫy <code>()</code> và <code>{}</code>: <code>a(10)</code> là 10 phần tử, <code>b{10}</code> là 1 phần tử.</p>
+</div></section>
+
+<section id="t3"><h2>3. Truy cập thành viên của class</h2>
+<p>Dùng <b>toán tử chấm</b> <code>.</code> với object, và <b>toán tử mũi tên</b> <code>-&gt;</code> với con trỏ.</p>
+<pre><code>Account frank_account;
+frank_account.balance;
+frank_account.deposit(1000.0);
+
+Account *p = new Account();
+(*p).balance;        // giải tham chiếu rồi dùng dấu chấm
+p-&gt;deposit(1000.0);  // mũi tên – tương đương
+delete p;</code></pre>
+<div class="warn">Trong <code>AccessingClassMembers</code> mọi thành viên đều <code>public</code> nên mới biên dịch được. Nếu là private sẽ báo lỗi.</div>
+<div class="ex">
+<div class="ex-title">▶ Ví dụ đầy đủ &amp; Output</div>
+<pre><code>class Account {
+public:
+    string name;
+    double balance {0};
+    void deposit(double amount) { balance += amount; }
+};
+
+int main() {
+    Account a;
+    a.name = "Frank";
+    a.deposit(1000);
+    cout &lt;&lt; a.name &lt;&lt; " has " &lt;&lt; a.balance &lt;&lt; endl;
+
+    Account *p = new Account;
+    p-&gt;name = "Jim";
+    p-&gt;deposit(50);
+    (*p).deposit(25);
+    cout &lt;&lt; p-&gt;name &lt;&lt; " has " &lt;&lt; p-&gt;balance &lt;&lt; endl;
+    delete p;
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Frank has 1000
+Jim has 75</pre>
+<p class="ex-why"><b>Giải thích:</b> Dùng <code>.</code> với object và <code>-&gt;</code> với con trỏ. <code>(*p).deposit(25)</code> và <code>p-&gt;deposit(25)</code> là như nhau.</p>
+</div></section>
+
+<section id="t4"><h2>4. public và private (phạm vi truy cập)</h2>
+<table><tr><th>Từ khóa</th><th>Truy cập được từ</th></tr>
+<tr><td><code>public</code></td><td>mọi nơi</td></tr>
+<tr><td><code>private</code></td><td>chỉ thành viên/friend của lớp (mặc định của <code>class</code>)</td></tr>
+<tr><td><code>protected</code></td><td>lớp + lớp con (kế thừa)</td></tr></table>
+<pre><code>class Player {
+private:
+    std::string name; int health; int xp;
+public:
+    void talk(std::string text) { std::cout &lt;&lt; name &lt;&lt; " says " &lt;&lt; text; }
+    bool is_dead();
+};
+Player frank;
+frank.name = "Frank";   // ❌ lỗi biên dịch: private
+frank.talk("Hello");    // ✅</code></pre>
+<h3>Bất biến lớp (class invariant) &amp; setter có kiểm tra</h3>
+<p>Lý do thật sự để dùng <code>private</code>: lớp tự bảo đảm dữ liệu <b>luôn hợp lệ</b> (bất biến). VD: số dư không bao giờ âm. Constructor thiết lập bất biến, mọi phương thức public phải giữ nó.</p>
+<pre><code>class Account {
+    std::string name;
+    double balance {0};
+public:
+    Account(std::string n, double b) : name{std::move(n)}, balance{b} {
+        if (balance &lt; 0) throw std::invalid_argument("balance &lt; 0");
+    }
+    bool withdraw(double amount) {
+        if (amount &lt;= 0 || amount &gt; balance) return false;   // giữ bất biến
+        balance -= amount;
+        return true;
+    }
+    double get_balance() const { return balance; }
+};</code></pre>
+<div class="note">Getter/setter "trần" cho mọi thuộc tính (<code>set_balance(double)</code> không kiểm tra) gần như phá vỡ đóng gói. Ưu tiên phương thức mang ý nghĩa nghiệp vụ: <code>deposit</code>, <code>withdraw</code>.</div>
+<div class="ex">
+<div class="ex-title">▶ Ví dụ đầy đủ &amp; Output</div>
+<pre><code>class Player {
+private:
+    string name {"Frank"};
+    int health {100};
+public:
+    void talk(string text) { cout &lt;&lt; name &lt;&lt; " says " &lt;&lt; text &lt;&lt; endl; }
+    void take_damage(int d) {
+        health -= d;
+        if (health &lt; 0) health = 0;
+    }
+    int get_health() { return health; }
+};
+
+int main() {
+    Player frank;
+    frank.talk("Hello");
+    frank.take_damage(130);
+    cout &lt;&lt; "Health: " &lt;&lt; frank.get_health() &lt;&lt; endl;
+    // frank.health = -30;   // compile error: private
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Frank says Hello
+Health: 0</pre>
+<p class="ex-why"><b>Giải thích:</b> Bên ngoài không sửa được <code>health</code> trực tiếp, chỉ đi qua <code>take_damage</code> — nhờ vậy class tự bảo đảm health không bao giờ âm (bị trừ 130 nhưng vẫn là 0).</p>
+</div></section>
+
+<section id="t5"><h2>5. Cài đặt phương thức thành viên</h2>
+<p>Phương thức có thể cài đặt <b>bên trong</b> class (ngầm định là inline) hoặc <b>bên ngoài</b> bằng toán tử phạm vi <code>Class::method</code>. Dự án thực tế tách <b>đặc tả</b> (<code>.h</code>) và <b>cài đặt</b> (<code>.cpp</code>).</p>
+<pre><code>// Account.h
+#ifndef ACCOUNT_H      // include guard (hoặc #pragma once)
+#define ACCOUNT_H
+#include &lt;string&gt;
+class Account {
+private:
+    std::string name; double balance;
+public:
+    void set_balance(double bal) { balance = bal; }  // inline
+    double get_balance() { return balance; }
+    void set_name(std::string n);
+    std::string get_name();
+    bool deposit(double amount);
+    bool withdraw(double amount);
+};
+#endif
+
+// Account.cpp
+#include "Account.h"
+void Account::set_name(std::string n) { name = n; }
+std::string Account::get_name() { return name; }
+bool Account::deposit(double amount) { balance += amount; return true; }
+bool Account::withdraw(double amount) {
+    if (balance - amount &gt;= 0) { balance -= amount; return true; }
+    return false;
+}</code></pre>
+<div class="note">Include guard ngăn một header bị xử lý hai lần. Không bao giờ <code>#include</code> file .cpp.</div>
+<h3>Viết header đúng chuẩn</h3>
+<ul>
+<li>Tên include guard như <code>_ACCOUNT_H_</code> (gạch dưới + chữ HOA) thực ra là <b>tên dành riêng</b> cho trình biên dịch. Nên dùng <code>ACCOUNT_H</code> hoặc <code>#pragma once</code>.</li>
+<li><b>Không</b> viết <code>using namespace std;</code> trong header — nó "lây" sang mọi file include header đó. Viết đầy đủ <code>std::string</code>.</li>
+<li>Header chỉ <code>#include</code> thứ nó thực sự cần; còn lại để trong .cpp.</li>
+<li>Hàm định nghĩa trong thân class là inline ngầm định → đặt trong header được. Hàm định nghĩa <b>ngoài</b> class nhưng trong header thì phải thêm <code>inline</code>, nếu không sẽ lỗi linker "multiple definition".</li>
+<li>Biên dịch nhiều file: <code>g++ -std=c++17 -Wall main.cpp Account.cpp -o app</code>.</li>
+</ul>
+<div class="ex">
+<div class="ex-title">▶ Ví dụ đầy đủ &amp; Output</div>
+<pre><code>class Account {
+private:
+    string name;
+    double balance {0};
+public:
+    void set_name(string n);
+    string get_name();
+    void deposit(double amount) { balance += amount; }   // inline
+    bool withdraw(double amount);
+};
+
+void Account::set_name(string n) { name = n; }
+string Account::get_name() { return name; }
+bool Account::withdraw(double amount) {
+    if (balance - amount &gt;= 0) { balance -= amount; return true; }
+    return false;
+}
+
+int main() {
+    Account a;
+    a.set_name("Frank");
+    a.deposit(100);
+    cout &lt;&lt; boolalpha;
+    cout &lt;&lt; a.get_name() &lt;&lt; " withdraw 30: " &lt;&lt; a.withdraw(30) &lt;&lt; endl;
+    cout &lt;&lt; a.get_name() &lt;&lt; " withdraw 500: " &lt;&lt; a.withdraw(500) &lt;&lt; endl;
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Frank withdraw 30: true
+Frank withdraw 500: false</pre>
+<p class="ex-why"><b>Giải thích:</b> Phương thức khai báo trong class, cài đặt bên ngoài bằng <code>Account::</code>. (Ở đây gộp 1 file cho dễ chạy; dự án thật tách .h / .cpp.)</p>
+</div></section>
+
+<section id="t6"><h2>6. Constructor (hàm tạo) và Destructor (hàm hủy)</h2>
+<ul><li><b>Constructor</b>: phương thức đặc biệt tự động gọi khi tạo object. Trùng tên lớp, <b>không có kiểu trả về</b>, có thể nạp chồng.</li>
+<li><b>Destructor</b>: tự động gọi khi object bị hủy (ra khỏi phạm vi, hoặc <code>delete</code>). Tên <code>~Class()</code>, không tham số, không trả về, <b>chỉ có một</b>. Dùng để giải phóng tài nguyên (bộ nhớ, file…).</li></ul>
+<pre><code>class Player {
+public:
+    Player()                         { cout &lt;&lt; "No args constructor called\n"; }
+    Player(std::string name)          { cout &lt;&lt; "String arg constructor called\n"; }
+    Player(std::string name, int h, int xp) { cout &lt;&lt; "Three args constructor called\n"; }
+    ~Player()                        { cout &lt;&lt; "Destructor called for " &lt;&lt; name &lt;&lt; endl; }
+};
+{
+    Player slayer;
+    slayer.set_name("Slayer");
+}   // destructor của Slayer được gọi ở đây
+Player *enemy = new Player;
+delete enemy;  // gọi destructor</code></pre>
+<div class="note">Object cục bộ bị hủy theo <b>thứ tự ngược</b> với lúc tạo.</div>
+<h3>Vòng đời object & RAII</h3>
+<p><b>RAII</b> (Resource Acquisition Is Initialization): lấy tài nguyên trong constructor, trả lại trong destructor. Vì destructor tự chạy khi object ra khỏi phạm vi (kể cả khi có exception), tài nguyên không bao giờ bị rò rỉ.</p>
+<pre><code>{
+    std::ofstream file {"log.txt"};   // mở file trong ctor
+    file &lt;&lt; "hello";
+}   // tự đóng bởi destructor
+
+auto p = std::make_unique&lt;Player&gt;("Hero");   // không cần delete thủ công</code></pre>
+<table><tr><th>Object</th><th>Bị hủy khi</th></tr>
+<tr><td>Cục bộ (stack)</td><td>hết khối lệnh, ngược thứ tự tạo</td></tr>
+<tr><td>Heap (<code>new</code>)</td><td>chỉ khi bạn gọi <code>delete</code> (hoặc smart pointer bị hủy)</td></tr>
+<tr><td>Tạm thời</td><td>hết biểu thức chứa nó</td></tr>
+<tr><td>static / toàn cục</td><td>kết thúc chương trình</td></tr></table>
+<div class="ex">
+<div class="ex-title">▶ Ví dụ đầy đủ &amp; Output</div>
+<pre><code>class Player {
+    string name;
+public:
+    Player(string n) : name{n} { cout &lt;&lt; "Constructor: " &lt;&lt; name &lt;&lt; endl; }
+    ~Player() { cout &lt;&lt; "Destructor: " &lt;&lt; name &lt;&lt; endl; }
+};
+
+int main() {
+    {
+        Player a {"A"};
+        Player b {"B"};
+        cout &lt;&lt; "--- end of block ---" &lt;&lt; endl;
+    }
+    Player *h = new Player {"Heap"};
+    delete h;
+    cout &lt;&lt; "--- end of main ---" &lt;&lt; endl;
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Constructor: A
+Constructor: B
+--- end of block ---
+Destructor: B
+Destructor: A
+Constructor: Heap
+Destructor: Heap
+--- end of main ---</pre>
+<p class="ex-why"><b>Giải thích:</b> Quan sát thứ tự: A, B tạo trước; khi ra khỏi khối, hủy <b>ngược lại</b> B rồi A. Object trên heap chỉ bị hủy khi gọi <code>delete</code>.</p>
+</div></section>
+
+<section id="t7"><h2>7. Constructor mặc định</h2>
+<p>Là constructor không nhận tham số. Nếu bạn <b>không viết constructor nào</b>, trình biên dịch tự sinh một cái (để các biến kiểu cơ bản chưa khởi tạo!). Khi bạn đã viết <i>bất kỳ</i> constructor nào, trình biên dịch <b>không</b> sinh constructor mặc định nữa.</p>
+<pre><code>class Account {
+    std::string name; double balance;
+public:
+    Account(std::string n, double b) : name{n}, balance{b} {}
+};
+Account a;             // ❌ lỗi: không có constructor mặc định
+Account b {"Bob", 10}; // ✅</code></pre>
+<h3><code>= default</code> và <code>= delete</code></h3>
+<pre><code>class Account {
+public:
+    Account() = default;                          // yêu cầu compiler tự sinh
+    Account(const Account &amp;) = delete;            // cấm sao chép
+    Account &amp;operator=(const Account &amp;) = delete;
+};
+Account a;
+Account b {a};   // ❌ lỗi: dùng hàm đã bị xóa</code></pre>
+<p>Dùng <code>= delete</code> cho đối tượng phải là duy nhất (file handle, socket, mã tài khoản…).</p>
+<div class="ex">
+<div class="ex-title">▶ Ví dụ đầy đủ &amp; Output</div>
+<pre><code>class Account {
+    string name;
+    double balance;
+public:
+    Account() : name{"None"}, balance{0} { cout &lt;&lt; "Default ctor" &lt;&lt; endl; }
+    Account(string n, double b) : name{n}, balance{b} { cout &lt;&lt; "2-arg ctor" &lt;&lt; endl; }
+    void show() { cout &lt;&lt; name &lt;&lt; ": " &lt;&lt; balance &lt;&lt; endl; }
+};
+
+int main() {
+    Account a;
+    a.show();
+    Account b {"Bob", 10};
+    b.show();
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Default ctor
+None: 0
+2-arg ctor
+Bob: 10</pre>
+<p class="ex-why"><b>Giải thích:</b> <code>Account a;</code> gọi constructor mặc định (không tham số). Nếu xóa constructor đó đi, dòng <code>Account a;</code> sẽ lỗi biên dịch.</p>
+</div></section>
+
+<section id="t8"><h2>8. Nạp chồng (overload) constructor</h2>
+<p>Giống hàm, constructor có thể nạp chồng miễn mỗi cái có chữ ký khác nhau. Trong zip: <code>Player()</code>, <code>Player(std::string)</code>, <code>Player(std::string,int,int)</code>.</p>
+<pre><code>Player empty;                        // Player()
+Player frank {"Frank"};              // Player(std::string)
+Player villain {"Villain", 100, 55}; // 3 tham số</code></pre>
+<h3>Constructor <code>explicit</code></h3>
+<p>Constructor một tham số hoạt động như <b>phép chuyển kiểu ngầm định</b>, có thể gây bug khó thấy:</p>
+<pre><code>class Account { public: Account(double balance); };
+void print(Account a);
+print(500.0);   // biên dịch được! 500.0 bị âm thầm chuyển thành Account
+
+class Account2 { public: explicit Account2(double balance); };
+print2(500.0);            // ❌ lỗi
+print2(Account2{500.0});  // ✅ ý đồ rõ ràng</code></pre>
+<div class="note">Nguyên tắc: đánh dấu <code>explicit</code> cho constructor một tham số, trừ khi bạn thật sự muốn chuyển kiểu.</div>
+<div class="ex">
+<div class="ex-title">▶ Ví dụ đầy đủ &amp; Output</div>
+<pre><code>class Player {
+    string name; int health; int xp;
+public:
+    Player() : name{"None"}, health{0}, xp{0} { cout &lt;&lt; "Player()" &lt;&lt; endl; }
+    Player(string n) : name{n}, health{0}, xp{0} { cout &lt;&lt; "Player(string)" &lt;&lt; endl; }
+    Player(string n, int h, int x) : name{n}, health{h}, xp{x} {
+        cout &lt;&lt; "Player(string, int, int)" &lt;&lt; endl;
+    }
+};
+
+int main() {
+    Player empty;
+    Player frank {"Frank"};
+    Player villain {"Villain", 100, 55};
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Player()
+Player(string)
+Player(string, int, int)</pre>
+<p class="ex-why"><b>Giải thích:</b> Trình biên dịch chọn constructor dựa vào số lượng và kiểu đối số.</p>
+</div></section>
+
+<section id="t9"><h2>9. Danh sách khởi tạo (initialization list)</h2>
+<p>Khởi tạo thành viên <b>trước khi</b> thân constructor chạy — đây là khởi tạo thật chứ không phải gán. Hiệu quả hơn, và bắt buộc với thành viên <code>const</code> hoặc tham chiếu.</p>
+<pre><code>// Gán (cách cũ)
+Player::Player() { name = "None"; health = 0; xp = 0; }
+
+// Danh sách khởi tạo (tốt hơn)
+Player::Player()
+    : name{"None"}, health{0}, xp{0} { }
+
+Player::Player(std::string name_val, int health_val, int xp_val)
+    : name{name_val}, health{health_val}, xp{xp_val} { }</code></pre>
+<div class="warn">Thành viên được khởi tạo theo thứ tự <b>khai báo trong class</b>, không theo thứ tự trong danh sách.</div>
+<h3>Khởi tạo mặc định ngay trong class (C++11)</h3>
+<p>Có thể gán giá trị mặc định cho thành viên ngay trong class. Constructor nào không khởi tạo thành viên đó trong danh sách khởi tạo sẽ dùng giá trị này → hết giá trị rác.</p>
+<pre><code>class Player {
+    std::string name {"None"};
+    int health {100};
+    int xp {0};
+public:
+    Player() = default;                       // dùng các giá trị trên
+    Player(std::string n) : name{n} {}        // health=100, xp=0
+};</code></pre>
+<div class="note">Ưu tiên: danh sách khởi tạo &gt; khởi tạo trong class &gt; không gì cả (kiểu cơ bản sẽ chứa rác!).</div>
+<div class="ex">
+<div class="ex-title">▶ Ví dụ đầy đủ &amp; Output</div>
+<pre><code>class Player {
+    const int id;
+    string name;
+    int health {100};
+public:
+    Player(int i, string n) : id{i}, name{n} { }
+    void show() const { cout &lt;&lt; "#" &lt;&lt; id &lt;&lt; " " &lt;&lt; name &lt;&lt; " hp=" &lt;&lt; health &lt;&lt; endl; }
+};
+
+int main() {
+    Player p {1, "Frank"};
+    p.show();
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">#1 Frank hp=100</pre>
+<p class="ex-why"><b>Giải thích:</b> <code>id</code> là <code>const</code> nên <b>bắt buộc</b> khởi tạo trong danh sách khởi tạo (viết <code>id = i;</code> trong thân constructor sẽ lỗi biên dịch); còn <code>health {100}</code> dùng giá trị mặc định ngay trong class vì không có trong danh sách khởi tạo.</p>
+</div></section>
+
+<section id="t10"><h2>10. Constructor ủy quyền (delegating)</h2>
+<p>Một constructor có thể gọi constructor khác của cùng lớp trong danh sách khởi tạo → giảm code trùng lặp.</p>
+<pre><code>Player::Player(std::string name_val, int health_val, int xp_val)
+    : name{name_val}, health{health_val}, xp{xp_val} {
+    cout &lt;&lt; "Three-args constructor" &lt;&lt; endl;
+}
+Player::Player() : Player{"None", 0, 0} {
+    cout &lt;&lt; "No-args constructor" &lt;&lt; endl;
+}
+Player::Player(std::string name_val) : Player{name_val, 0, 0} {
+    cout &lt;&lt; "One-arg constructor" &lt;&lt; endl;
+}</code></pre>
+<p>Output của <code>Player empty;</code>: trước tiên <i>Three-args constructor</i>, sau đó <i>No-args constructor</i> (thân constructor được ủy quyền chạy trước).</p>
+<div class="ex">
+<div class="ex-title">▶ Ví dụ đầy đủ &amp; Output</div>
+<pre><code>class Player {
+    string name; int health; int xp;
+public:
+    Player(string n, int h, int x) : name{n}, health{h}, xp{x} {
+        cout &lt;&lt; "Three-args constructor" &lt;&lt; endl;
+    }
+    Player() : Player{"None", 0, 0} { cout &lt;&lt; "No-args constructor" &lt;&lt; endl; }
+    Player(string n) : Player{n, 0, 0} { cout &lt;&lt; "One-arg constructor" &lt;&lt; endl; }
+};
+
+int main() {
+    Player empty;
+    cout &lt;&lt; "---" &lt;&lt; endl;
+    Player frank {"Frank"};
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Three-args constructor
+No-args constructor
+---
+Three-args constructor
+One-arg constructor</pre>
+<p class="ex-why"><b>Giải thích:</b> Constructor được ủy quyền (3 tham số) chạy <b>trước</b>, sau đó mới đến thân của constructor gọi nó.</p>
+</div></section>
+
+<section id="t11"><h2>11. Tham số mặc định cho constructor</h2>
+<p>Một constructor có tham số mặc định có thể thay thế nhiều bản nạp chồng.</p>
+<pre><code>class Player {
+public:
+    Player(std::string name_val = "None", int health_val = 0, int xp_val = 0);
+};
+Player::Player(std::string name_val, int health_val, int xp_val)
+    : name{name_val}, health{health_val}, xp{xp_val} { }
+
+Player empty;              // None, 0, 0
+Player frank {"Frank"};    // Frank, 0, 0
+Player hero {"Hero", 100}; // Hero, 100, 0</code></pre>
+<div class="warn">Giá trị mặc định chỉ ghi ở phần khai báo (.h). Đừng viết thêm <code>Player()</code> – lời gọi sẽ bị <b>mơ hồ (ambiguous)</b>.</div>
+<div class="ex">
+<div class="ex-title">▶ Ví dụ đầy đủ &amp; Output</div>
+<pre><code>class Player {
+    string name; int health; int xp;
+public:
+    Player(string n = "None", int h = 0, int x = 0) : name{n}, health{h}, xp{x} { }
+    void show() const { cout &lt;&lt; name &lt;&lt; " " &lt;&lt; health &lt;&lt; " " &lt;&lt; xp &lt;&lt; endl; }
+};
+
+int main() {
+    Player a;                       a.show();
+    Player b {"Frank"};             b.show();
+    Player c {"Hero", 100};         c.show();
+    Player d {"Villain", 100, 55};  d.show();
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">None 0 0
+Frank 0 0
+Hero 100 0
+Villain 100 55</pre>
+<p class="ex-why"><b>Giải thích:</b> Chỉ <b>một</b> constructor nhưng gọi được với 0, 1, 2 hoặc 3 đối số; tham số thiếu lấy giá trị mặc định.</p>
+</div></section>
+
+<section id="t12"><h2>12. Copy constructor (hàm tạo sao chép)</h2>
+<p>Được gọi khi một object được tạo ra như bản sao của object cùng kiểu:</p>
+<ul><li>truyền object <b>theo giá trị</b> vào hàm</li><li>trả về object theo giá trị</li><li>tạo object từ object khác: <code>Player b {a};</code></li></ul>
+<p>Nếu bạn không viết, trình biên dịch tự sinh bản <b>sao chép từng thành viên</b>. Chữ ký: <code>Type(const Type &amp;source);</code></p>
+<pre><code>Player::Player(const Player &amp;source)
+    : name{source.name}, health{source.health}, xp{source.xp} {
+    cout &lt;&lt; "Copy constructor - made copy of: " &lt;&lt; source.name &lt;&lt; endl;
+}
+// hoặc ủy quyền:
+Player::Player(const Player &amp;source)
+    : Player{source.name, source.health, source.xp} { }
+
+void display_player(Player p) { ... }   // p là bản sao!
+Player empty {"XXXXXX", 100, 50};
+Player my_new_object {empty};   // copy ctor
+display_player(empty);          // copy ctor</code></pre>
+<div class="note">Truyền bằng <code>const &amp;</code> khi không cần bản sao để tránh chi phí này.</div>
+<h3>Toán tử gán copy vs copy constructor</h3>
+<p>Copy constructor tạo object <b>mới</b>. Toán tử gán ghi đè lên object <b>đã tồn tại</b>. Cả hai đều được tự sinh mặc định (sao chép nông!).</p>
+<pre><code>Deep a {100};
+Deep b {a};    // copy CONSTRUCTOR (b mới tạo)
+Deep c {5};
+c = a;         // toán tử GÁN copy (c đã tồn tại)
+
+Deep &amp;Deep::operator=(const Deep &amp;rhs) {
+    if (this == &amp;rhs) return *this;   // kiểm tra tự gán
+    delete data;                       // giải phóng tài nguyên cũ
+    data = new int{*rhs.data};         // sao chép sâu
+    return *this;
+}
+Deep &amp;Deep::operator=(Deep &amp;&amp;rhs) noexcept {   // gán di chuyển
+    if (this == &amp;rhs) return *this;
+    delete data;
+    data = rhs.data;
+    rhs.data = nullptr;
+    return *this;
+}</code></pre>
+<p>Sẽ học kỹ ở Section 14 (Nạp chồng toán tử).</p>
+<div class="ex">
+<div class="ex-title">▶ Ví dụ đầy đủ &amp; Output</div>
+<pre><code>class Player {
+    string name;
+public:
+    Player(string n) : name{n} { }
+    Player(const Player &amp;src) : name{src.name} { cout &lt;&lt; "Copy ctor: " &lt;&lt; name &lt;&lt; endl; }
+    string get_name() const { return name; }
+};
+
+void by_value(Player p)      { cout &lt;&lt; "by_value: " &lt;&lt; p.get_name() &lt;&lt; endl; }
+void by_ref(const Player &amp;p) { cout &lt;&lt; "by_ref: " &lt;&lt; p.get_name() &lt;&lt; endl; }
+
+int main() {
+    Player a {"Frank"};
+    Player b {a};
+    by_value(a);
+    by_ref(a);
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Copy ctor: Frank
+Copy ctor: Frank
+by_value: Frank
+by_ref: Frank</pre>
+<p class="ex-why"><b>Giải thích:</b> Copy constructor chạy 2 lần: khi tạo <code>b</code> từ <code>a</code> và khi truyền theo giá trị. Truyền <code>const &amp;</code> thì <b>không</b> sao chép.</p>
+</div></section>
+
+<section id="t13"><h2>13. Shallow copy (sao chép nông) vs Deep copy (sao chép sâu)</h2>
+<p>Khi lớp có thành viên là <b>con trỏ thô</b>, sao chép mặc định chỉ chép <i>địa chỉ</i>, không chép dữ liệu → hai object dùng chung một vùng nhớ heap.</p>
+<pre><code>class Shallow {
+    int *data;
+public:
+    Shallow(int d) { data = new int; *data = d; }
+    Shallow(const Shallow &amp;source) : data{source.data} {   // NÔNG
+        cout &lt;&lt; "Copy constructor - shallow copy\n";
+    }
+    ~Shallow() { delete data; cout &lt;&lt; "Destructor freeing data\n"; }
+};
+void display_shallow(Shallow s) { ... }   // s bị hủy khi hết hàm → xóa vùng nhớ chung!
+Shallow obj1 {100};
+display_shallow(obj1);   // obj1.data giờ là con trỏ treo (dangling)
+Shallow obj2 {obj1};
+obj2.set_data_value(1000);   // 💥 hành vi không xác định, delete 2 lần → crash</code></pre>
+<p><b>Deep copy</b>: cấp phát vùng nhớ mới và chép <i>giá trị</i>.</p>
+<pre><code>Deep::Deep(const Deep &amp;source) {
+    data = new int;
+    *data = *source.data;
+}
+// hoặc ủy quyền:
+Deep::Deep(const Deep &amp;source) : Deep{*source.data} { }</code></pre>
+<div class="note">Quy tắc ba (Rule of three): nếu cần destructor tự viết, bạn gần như chắc chắn cần copy constructor và copy assignment tự viết.</div>
+<h3>Quy tắc 0 / 3 / 5</h3>
+<table><tr><th>Quy tắc</th><th>Ý nghĩa</th></tr>
+<tr><td><b>Rule of Three</b></td><td>Nếu tự viết một trong: destructor, copy ctor, copy assignment → viết cả ba.</td></tr>
+<tr><td><b>Rule of Five</b> (C++11)</td><td>Thêm move ctor và move assignment.</td></tr>
+<tr><td><b>Rule of Zero</b> ⭐</td><td>Tốt nhất: không tự quản lý tài nguyên thô. Dùng <code>std::string</code>, <code>std::vector</code>, <code>std::unique_ptr</code> → bản compiler sinh ra đã đúng, bạn không cần viết hàm nào trong năm hàm trên.</td></tr></table>
+<pre><code>class IntArray {               // phiên bản Rule of Zero của ví dụ Deep/Move
+    std::vector&lt;int&gt; data;     // copy = sâu, move = rẻ, không cần destructor
+};</code></pre>
+<div class="ex">
+<div class="ex-title">▶ Ví dụ đầy đủ &amp; Output</div>
+<pre><code>class Deep {
+    int *data;
+public:
+    Deep(int d) : data{new int{d}} { }
+    Deep(const Deep &amp;src) : data{new int{*src.data}} { cout &lt;&lt; "Deep copy" &lt;&lt; endl; }
+    ~Deep() { delete data; }
+    void set(int d) { *data = d; }
+    int get() const { return *data; }
+};
+
+int main() {
+    Deep a {100};
+    Deep b {a};
+    b.set(999);
+    cout &lt;&lt; "a = " &lt;&lt; a.get() &lt;&lt; ", b = " &lt;&lt; b.get() &lt;&lt; endl;
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Deep copy
+a = 100, b = 999</pre>
+<p class="ex-why"><b>Giải thích:</b> Với deep copy, sửa <code>b</code> không ảnh hưởng <code>a</code>. Nếu là shallow copy, <code>a</code> cũng thành 999 và chương trình crash vì <code>delete</code> cùng vùng nhớ 2 lần.</p>
+</div></section>
+
+<section id="t14"><h2>14. Move constructor (hàm tạo di chuyển – C++11)</h2>
+<p>Sao chép rất tốn kém với đối tượng tạm (r-value) như <code>Move{10}</code>. Move constructor <b>"cướp"</b> tài nguyên của đối tượng tạm thay vì sao chép.</p>
+<ul><li>l-value: có tên/địa chỉ (<code>int x</code>). r-value: giá trị tạm (<code>10</code>, <code>Move{10}</code>, <code>x+y</code>).</li>
+<li><code>int &amp;</code> = tham chiếu l-value; <code>int &amp;&amp;</code> = tham chiếu r-value.</li></ul>
+<pre><code>Move::Move(Move &amp;&amp;source) noexcept
+    : data{source.data} {        // lấy con trỏ
+    source.data = nullptr;        // gán nullptr cho nguồn!
+    cout &lt;&lt; "Move constructor - moving resource: " &lt;&lt; *data &lt;&lt; endl;
+}
+Move::~Move() {
+    if (data != nullptr) cout &lt;&lt; "Destructor freeing data for: " &lt;&lt; *data &lt;&lt; endl;
+    else cout &lt;&lt; "Destructor freeing data for nullptr" &lt;&lt; endl;
+    delete data;   // delete nullptr là an toàn
+}
+vector&lt;Move&gt; vec;
+vec.push_back(Move{10});   // dùng move ctor thay vì copy</code></pre>
+<div class="warn">Luôn gán con trỏ nguồn = <code>nullptr</code>, nếu không destructor của đối tượng tạm sẽ giải phóng vùng nhớ vừa lấy. Đánh dấu <code>noexcept</code> để <code>std::vector</code> dùng nó khi mở rộng.</div>
+<h3><code>std::move</code> – khi nào move constructor được gọi?</h3>
+<p>Move ctor được chọn khi nguồn là <b>r-value</b>: đối tượng tạm, biến cục bộ được return, hoặc được ép kiểu bằng <code>std::move</code> (trong <code>&lt;utility&gt;</code>).</p>
+<pre><code>Move a {10};
+Move b {a};             // copy (a là l-value)
+Move c {std::move(a)};  // move – a giờ "rỗng", đừng dùng giá trị của nó nữa!
+vec.push_back(Move{20});    // move (đối tượng tạm)
+vec.emplace_back(30);       // tạo trực tiếp trong vector – không copy, không move</code></pre>
+<div class="warn"><code>std::move</code> tự nó không di chuyển gì; nó chỉ ép kiểu sang <code>T&amp;&amp;</code>. Ngoài ra compiler thường áp dụng <b>copy elision</b> (RVO) nên bạn có thể thấy ít dòng copy/move hơn dự đoán — điều đó bình thường.</div>
+<div class="ex">
+<div class="ex-title">▶ Ví dụ đầy đủ &amp; Output</div>
+<pre><code>class Move {
+    int *data;
+public:
+    Move(int d) : data{new int{d}} { cout &lt;&lt; "Ctor " &lt;&lt; d &lt;&lt; endl; }
+    Move(const Move &amp;s) : data{new int{*s.data}} { cout &lt;&lt; "Copy " &lt;&lt; *data &lt;&lt; endl; }
+    Move(Move &amp;&amp;s) noexcept : data{s.data} {
+        s.data = nullptr;
+        cout &lt;&lt; "Move " &lt;&lt; *data &lt;&lt; endl;
+    }
+    ~Move() {
+        if (data) cout &lt;&lt; "Dtor " &lt;&lt; *data &lt;&lt; endl;
+        else      cout &lt;&lt; "Dtor nullptr" &lt;&lt; endl;
+        delete data;
+    }
+};
+
+int main() {
+    Move a {10};
+    Move b {a};
+    Move c {std::move(a)};
+    cout &lt;&lt; "--- end ---" &lt;&lt; endl;
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Ctor 10
+Copy 10
+Move 10
+--- end ---
+Dtor 10
+Dtor 10
+Dtor nullptr</pre>
+<p class="ex-why"><b>Giải thích:</b> <code>b{a}</code> sao chép (cấp phát mới), <code>c{std::move(a)}</code> chỉ "lấy" con trỏ của <code>a</code> nên <code>a</code> còn lại <code>nullptr</code>. Lúc hủy: c, b, a (ngược thứ tự).</p>
+</div></section>
+
+<section id="t15"><h2>15. Con trỏ <code>this</code></h2>
+<p><code>this</code> là từ khóa: con trỏ trỏ tới object hiện tại, dùng trong phương thức thành viên. Công dụng: phân biệt thành viên với tham số trùng tên, truyền chính object, so sánh object.</p>
+<pre><code>void Account::set_balance(double balance) {
+    this-&gt;balance = balance;   // thành viên = tham số
+}
+int Player::compare(const Player &amp;other) {
+    if (this == &amp;other) cout &lt;&lt; "The same object" &lt;&lt; endl;
+}</code></pre>
+<div class="ex">
+<div class="ex-title">▶ Ví dụ đầy đủ &amp; Output</div>
+<pre><code>class Account {
+    double balance {0};
+public:
+    void set_balance(double balance) { this-&gt;balance = balance; }
+    double get() const { return balance; }
+    bool same(const Account &amp;o) const { return this == &amp;o; }
+};
+
+int main() {
+    Account a, b;
+    a.set_balance(500);
+    cout &lt;&lt; a.get() &lt;&lt; endl;
+    cout &lt;&lt; boolalpha &lt;&lt; a.same(a) &lt;&lt; " " &lt;&lt; a.same(b) &lt;&lt; endl;
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">500
+true false</pre>
+<p class="ex-why"><b>Giải thích:</b> <code>this-&gt;balance</code> là thành viên, <code>balance</code> là tham số. <code>this == &amp;o</code> kiểm tra hai biến có phải cùng một object không.</p>
+</div></section>
+
+<section id="t16"><h2>16. Dùng <code>const</code> với class</h2>
+<p>Object <code>const</code> chỉ gọi được <b>phương thức const</b> — phương thức cam kết không thay đổi object.</p>
+<pre><code>class Player {
+public:
+    std::string get_name() const { return name; }   // đúng const
+    void set_name(std::string n) { name = n; }
+};
+const Player villain {"Villain", 100, 55};
+villain.set_name("Nice guy");    // ❌ lỗi
+cout &lt;&lt; villain.get_name();      // ✅ vì get_name là const
+
+void display_player_name(const Player &amp;p) {
+    cout &lt;&lt; p.get_name() &lt;&lt; endl;   // cần phương thức const
+}</code></pre>
+<div class="note">Quy tắc: đánh dấu <code>const</code> cho mọi getter / phương thức không thay đổi trạng thái.</div>
+<h3><code>mutable</code> và nạp chồng theo <code>const</code></h3>
+<p><code>mutable</code> cho phép sửa một thành viên ngay cả trong phương thức const — dùng cho dữ liệu "phụ" không thuộc trạng thái logic (cache, bộ đếm, mutex).</p>
+<pre><code>class Movie {
+    std::string name;
+    mutable int times_queried {0};
+public:
+    const std::string &amp;get_name() const { ++times_queried; return name; }
+};</code></pre>
+<p>Có thể nạp chồng phương thức chỉ khác nhau ở <code>const</code>; object const gọi bản const:</p>
+<pre><code>class Movies {
+    std::vector&lt;Movie&gt; movies;
+public:
+    Movie &amp;at(size_t i)             { return movies.at(i); }   // sửa được
+    const Movie &amp;at(size_t i) const { return movies.at(i); }   // chỉ đọc
+};</code></pre>
+<div class="tip note">Getter trả <code>const std::string &amp;</code> tránh sao chép chuỗi, nhưng đừng trả tham chiếu tới biến cục bộ!</div>
+<div class="ex">
+<div class="ex-title">▶ Ví dụ đầy đủ &amp; Output</div>
+<pre><code>class Player {
+    string name;
+public:
+    Player(string n) : name{n} { }
+    string get_name() const { return name; }
+    void set_name(string n) { name = n; }
+};
+
+void show(const Player &amp;p) { cout &lt;&lt; "Name: " &lt;&lt; p.get_name() &lt;&lt; endl; }
+
+int main() {
+    const Player villain {"Villain"};
+    show(villain);
+    // villain.set_name("X");   // compile error: villain is const
+
+    Player hero {"Hero"};
+    hero.set_name("Super Hero");
+    show(hero);
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Name: Villain
+Name: Super Hero</pre>
+<p class="ex-why"><b>Giải thích:</b> <code>show</code> nhận <code>const Player &amp;</code> nên chỉ gọi được <code>get_name()</code> vì nó là phương thức <code>const</code>. Bỏ chữ <code>const</code> ở <code>get_name</code> là lỗi biên dịch ngay.</p>
+</div></section>
+
+<section id="t17"><h2>17. Thành viên static</h2>
+<p>Thuộc tính <code>static</code> thuộc về <b>lớp</b>, không thuộc object nào — chỉ có một bản dùng chung. Phương thức static chỉ truy cập được thành viên static, gọi bằng <code>Class::method()</code>.</p>
+<pre><code>// Player.h
+class Player {
+    static int num_players;
+public:
+    static int get_num_players();
+    Player(std::string name_val = "None", int health_val = 0, int xp_val = 0);
+    ~Player();
+};
+// Player.cpp
+int Player::num_players {0};          // định nghĩa & khởi tạo trong .cpp
+Player::Player(std::string n, int h, int x) : name{n}, health{h}, xp{x} { ++num_players; }
+Player::~Player() { --num_players; }
+int Player::get_num_players() { return num_players; }
+
+// main
+cout &lt;&lt; Player::get_num_players();   // 0
+Player hero {"Hero"};                // 1
+Player *enemy = new Player("Enemy", 100, 100);   // 2
+delete enemy;                        // 1</code></pre>
+<h3>Object chiếm bao nhiêu bộ nhớ?</h3>
+<ul>
+<li>Mỗi object chỉ chứa <b>thuộc tính không static</b>. Phương thức (code) và thành viên static dùng chung, không nằm trong object.</li>
+<li>Trình biên dịch có thể chèn <b>padding</b> để căn lề, nên <code>sizeof</code> có thể lớn hơn tổng các thành viên.</li>
+<li>Lớp rỗng vẫn có <code>sizeof</code> ≥ 1 để mỗi object có địa chỉ riêng.</li>
+</ul>
+<pre><code>struct A { char c; int i; char d; };   // thường sizeof = 12
+struct B { int i; char c; char d; };   // thường sizeof = 8 (sắp xếp lại → ít padding)
+class Empty {};                        // sizeof = 1</code></pre>
+<div class="ex">
+<div class="ex-title">▶ Ví dụ đầy đủ &amp; Output</div>
+<pre><code>class Player {
+    string name;
+    static int num_players;
+public:
+    Player(string n) : name{n} { ++num_players; }
+    ~Player() { --num_players; }
+    static int count() { return num_players; }
+};
+int Player::num_players {0};
+
+int main() {
+    cout &lt;&lt; Player::count() &lt;&lt; endl;
+    Player a {"A"};
+    {
+        Player b {"B"};
+        cout &lt;&lt; Player::count() &lt;&lt; endl;
+    }                                   // b destroyed here
+    cout &lt;&lt; Player::count() &lt;&lt; endl;
+    Player *e = new Player {"E"};
+    cout &lt;&lt; Player::count() &lt;&lt; endl;
+    delete e;
+    cout &lt;&lt; Player::count() &lt;&lt; endl;
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">0
+2
+1
+2
+1</pre>
+<p class="ex-why"><b>Giải thích:</b> <code>num_players</code> chỉ có <b>một bản</b> dùng chung cho mọi object: tăng khi tạo, giảm khi hủy.</p>
+</div></section>
+
+<section id="t18"><h2>18. struct vs class</h2>
+<p>Giống hệt nhau, chỉ khác phạm vi mặc định: thành viên <code>struct</code> mặc định <b>public</b>, <code>class</code> mặc định <b>private</b>. Quy ước: <code>struct</code> cho dữ liệu thụ động, <code>class</code> cho đối tượng có hành vi và dữ liệu riêng tư.</p>
+<pre><code>struct Person { std::string name; std::string get_name(); };
+Person p; p.name = "Frank";   // ✅ public
+class Person2 { std::string name; };
+Person2 q; q.name = "Frank";  // ❌ private</code></pre>
+<div class="ex">
+<div class="ex-title">▶ Ví dụ đầy đủ &amp; Output</div>
+<pre><code>struct Point { int x; int y; };
+
+class Point2 {
+    int x {1};
+    int y {2};
+public:
+    int get_x() const { return x; }
+};
+
+int main() {
+    Point p {3, 4};
+    p.x = 10;
+    cout &lt;&lt; p.x &lt;&lt; ", " &lt;&lt; p.y &lt;&lt; endl;
+    Point2 q;
+    cout &lt;&lt; q.get_x() &lt;&lt; endl;
+    // q.x = 5;   // compile error: private
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">10, 4
+1</pre>
+<p class="ex-why"><b>Giải thích:</b> <code>struct</code> mặc định public nên gán <code>p.x</code> trực tiếp được; <code>class</code> mặc định private nên phải qua getter.</p>
+</div></section>
+
+<section id="t19"><h2>19. Friend (bạn) của class</h2>
+<p><b>Friend</b> là hàm hoặc lớp được cấp quyền truy cập thành viên private. Quan hệ bạn được <b>cho, không phải tự lấy</b>; <b>không đối xứng</b>, <b>không bắc cầu</b>, <b>không kế thừa</b>.</p>
+<pre><code>class Player {
+    friend void display_player(Player &amp;p);                // hàm không phải thành viên
+    friend void Other_class::display_player(Player &amp;p);   // phương thức của lớp khác
+    friend class Friend_class;                            // cả một lớp
+private:
+    std::string name; int health; int xp;
+};
+void display_player(Player &amp;p) { cout &lt;&lt; p.name; }   // truy cập private được
+void Friend_class::set_hero_name(Player &amp;p, std::string name) { p.name = name; }</code></pre>
+<div class="warn">Hạn chế dùng friend — nó làm yếu tính đóng gói. Trường hợp hợp lý phổ biến: nạp chồng <code>operator&lt;&lt;</code>.</div>
+<h3>Ví dụ friend hợp lý: <code>operator&lt;&lt;</code></h3>
+<pre><code>class Player {
+    std::string name; int health;
+public:
+    Player(std::string n, int h) : name{n}, health{h} {}
+    friend std::ostream &amp;operator&lt;&lt;(std::ostream &amp;os, const Player &amp;p) {
+        return os &lt;&lt; "[" &lt;&lt; p.name &lt;&lt; ": " &lt;&lt; p.health &lt;&lt; "]";
+    }
+};
+Player hero {"Hero", 100};
+std::cout &lt;&lt; hero &lt;&lt; '\n';   // [Hero: 100]</code></pre>
+<p>Phải là hàm không phải thành viên vì toán hạng trái là <code>std::ostream</code>, không phải <code>Player</code>. Chi tiết ở Section 14.</p>
+<div class="ex">
+<div class="ex-title">▶ Ví dụ đầy đủ &amp; Output</div>
+<pre><code>class Player {
+    friend void display(const Player &amp;p);
+    string name;
+    int health;
+public:
+    Player(string n, int h) : name{n}, health{h} { }
+};
+
+void display(const Player &amp;p) {
+    cout &lt;&lt; p.name &lt;&lt; " (" &lt;&lt; p.health &lt;&lt; " hp)" &lt;&lt; endl;
+}
+
+int main() {
+    Player hero {"Hero", 100};
+    display(hero);
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Hero (100 hp)</pre>
+<p class="ex-why"><b>Giải thích:</b> <code>display</code> không phải thành viên nhưng đọc được <code>name</code>, <code>health</code> (private) vì được class khai báo là <code>friend</code>.</p>
+</div></section>
+
+<section id="t20"><h2>20. Section Challenge – Movies</h2>
+<p>Xây dựng hai lớp:</p>
+<ul><li><b>Movie</b>: <code>name</code>, <code>rating</code> (G, PG, PG-13, R), <code>watched</code> (số lần xem). Constructor, copy constructor, destructor, getter const, setter, <code>increment_watched()</code>, <code>display() const</code>.</li>
+<li><b>Movies</b>: chứa <code>std::vector&lt;Movie&gt;</code>. <code>bool add_movie(name, rating, watched)</code> – trả false nếu tên đã tồn tại; <code>bool increment_watched(name)</code> – false nếu không tìm thấy; <code>display() const</code> – in tất cả, hoặc "Sorry, no movies to display" nếu rỗng.</li></ul>
+<pre><code>bool Movies::add_movie(std::string name, std::string rating, int watched) {
+    for (const Movie &amp;movie : movies)
+        if (movie.get_name() == name) return false;
+    Movie temp {name, rating, watched};
+    movies.push_back(temp);
+    return true;
+}
+bool Movies::increment_watched(std::string name) {
+    for (Movie &amp;movie : movies)            // chú ý: tham chiếu không const
+        if (movie.get_name() == name) { movie.increment_watched(); return true; }
+    return false;
+}</code></pre>
+<p>Thực hành: <code>practice/ex08_movies_challenge.cpp</code>.</p>
+<div class="ex">
+<div class="ex-title">▶ Ví dụ đầy đủ &amp; Output</div>
+<pre><code>class Movie {
+    string name, rating;
+    int watched;
+public:
+    Movie(string n, string r, int w) : name{n}, rating{r}, watched{w} { }
+    string get_name() const { return name; }
+    void increment_watched() { ++watched; }
+    void display() const { cout &lt;&lt; name &lt;&lt; ", " &lt;&lt; rating &lt;&lt; ", " &lt;&lt; watched &lt;&lt; endl; }
+};
+
+class Movies {
+    vector&lt;Movie&gt; movies;
+public:
+    bool add_movie(string n, string r, int w) {
+        for (const Movie &amp;m : movies)
+            if (m.get_name() == n) return false;
+        movies.emplace_back(n, r, w);
+        return true;
+    }
+    bool increment_watched(string n) {
+        for (Movie &amp;m : movies)
+            if (m.get_name() == n) { m.increment_watched(); return true; }
+        return false;
+    }
+    void display() const {
+        if (movies.empty()) { cout &lt;&lt; "Sorry, no movies to display" &lt;&lt; endl; return; }
+        for (const Movie &amp;m : movies) m.display();
+    }
+};
+
+int main() {
+    Movies my;
+    my.display();
+    cout &lt;&lt; boolalpha;
+    cout &lt;&lt; my.add_movie("Big", "PG-13", 2) &lt;&lt; endl;
+    cout &lt;&lt; my.add_movie("Star Wars", "PG", 5) &lt;&lt; endl;
+    cout &lt;&lt; my.add_movie("Big", "PG-13", 3) &lt;&lt; endl;
+    my.increment_watched("Big");
+    cout &lt;&lt; my.increment_watched("XXX") &lt;&lt; endl;
+    my.display();
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Sorry, no movies to display
+true
+true
+false
+false
+Big, PG-13, 3
+Star Wars, PG, 5</pre>
+<p class="ex-why"><b>Giải thích:</b> Phiên bản rút gọn chạy được của challenge: thêm trùng tên trả <code>false</code>, tăng lượt xem phim không tồn tại cũng trả <code>false</code>.</p>
+</div></section>
+
+<section id="sum"><h2>✅ Tổng kết</h2><h3>Checklist lỗi thường gặp</h3>
+<ul>
+<li>Quên <code>;</code> sau dấu đóng ngoặc của class.</li>
+<li>Ghi lại tham số mặc định trong phần định nghĩa ở .cpp → lỗi biên dịch.</li>
+<li>Định nghĩa biến static trong header → lỗi linker định nghĩa nhiều lần (hoặc dùng <code>inline static int n {0};</code> từ C++17).</li>
+<li>Copy ctor nhận tham số theo giá trị → đệ quy vô hạn / lỗi biên dịch.</li>
+<li>Quên <code>src.data = nullptr</code> trong move ctor → giải phóng hai lần.</li>
+<li>Thiếu <code>const</code> ở getter → không dùng được với tham số <code>const&amp;</code>.</li>
+<li>Dùng <code>delete</code> thay vì <code>delete[]</code> cho mảng.</li>
+<li>Range-for với <code>const Movie &amp;</code> khi cần sửa → lỗi biên dịch; với <code>Movie</code> (theo giá trị) → âm thầm sửa trên bản sao!</li>
+<li><code>Player p();</code> là khai báo <b>hàm</b>, không phải object ("most vexing parse"). Dùng <code>Player p;</code> hoặc <code>Player p{};</code>.</li>
+</ul><table>
+<tr><th>Khái niệm</th><th>Cú pháp chính</th></tr>
+<tr><td>Toán tử phạm vi</td><td><code>void Account::deposit(double a) {...}</code></td></tr>
+<tr><td>Danh sách khởi tạo</td><td><code>: name{n}, hp{h}</code></td></tr>
+<tr><td>Ủy quyền</td><td><code>Player() : Player{"None",0,0} {}</code></td></tr>
+<tr><td>Copy ctor</td><td><code>T(const T &amp;src)</code></td></tr>
+<tr><td>Move ctor</td><td><code>T(T &amp;&amp;src) noexcept</code> + <code>src.ptr = nullptr</code></td></tr>
+<tr><td>Destructor</td><td><code>~T()</code></td></tr>
+<tr><td>Phương thức const</td><td><code>int get() const</code></td></tr>
+<tr><td>static</td><td><code>static int n;</code> + <code>int T::n {0};</code></td></tr>
+<tr><td>friend</td><td><code>friend void f(T&amp;); friend class X;</code></td></tr></table>
+<p><a href="exercises_vi.html"><button>Làm bài tập →</button></a></p></section>
+</main></div></body></html>

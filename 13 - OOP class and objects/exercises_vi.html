@@ -1,0 +1,98 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><title>Section 13 Bài tập (VI)</title><link rel="stylesheet" href="style.css"><script src="quiz.js"></script></head>
+<body><header><h1>📝 Section 13 – Bài tập</h1><a href="index.html">Trang chủ</a><a href="lesson_vi.html">← Bài học</a><a href="exercises_en.html">🇬🇧 English</a></header>
+<main style="max-width:1000px;margin:auto">
+<section><h2>Phần A – Trắc nghiệm (20 câu)</h2>
+<div class="q" data-a="1" data-ex="Thành viên class mặc định là private."><b>1.</b> Phạm vi mặc định của thành viên trong <code>class</code>?<label>public</label><label>private</label><label>protected</label><label>friend</label></div>
+<div class="q" data-a="2" data-ex="struct mặc định public."><b>2.</b> Khác biệt duy nhất giữa struct và class là:<label>struct không có phương thức</label><label>struct không có constructor</label><label>phạm vi mặc định (struct = public)</label><label>struct luôn nằm trên heap</label></div>
+<div class="q" data-a="0" data-ex="Con trỏ dùng ->."><b>3.</b> Với <code>Account *p = new Account;</code> gọi deposit thế nào?<label>p-&gt;deposit(10);</label><label>p.deposit(10);</label><label>*p.deposit(10);</label><label>&amp;p.deposit(10);</label></div>
+<div class="q" data-a="3" data-ex="Constructor không có kiểu trả về, kể cả void."><b>4.</b> Phát biểu nào ĐÚNG về constructor?<label>Trả về void</label><label>Mỗi lớp chỉ có một</label><label>Phải gọi tường minh</label><label>Không có kiểu trả về và có thể nạp chồng</label></div>
+<div class="q" data-a="1" data-ex="Đúng một destructor, không tham số."><b>5.</b> Một lớp có thể có bao nhiêu destructor?<label>Bao nhiêu cũng được</label><label>Đúng một</label><label>Không có</label><label>Mỗi constructor một cái</label></div>
+<div class="q" data-a="2" data-ex="Đã khai báo constructor thì không còn constructor mặc định ngầm định."><b>6.</b> Lớp chỉ khai báo <code>Account(std::string, double)</code>. <code>Account a;</code> sẽ:<label>Biên dịch được, dùng ctor mặc định tự sinh</label><label>Biên dịch được với giá trị rác</label><label>Lỗi biên dịch</label><label>Lỗi lúc chạy</label></div>
+<div class="q" data-a="0" data-ex="Theo thứ tự khai báo trong class."><b>7.</b> Thành viên trong danh sách khởi tạo được khởi tạo theo thứ tự:<label>khai báo trong class</label><label>xuất hiện trong danh sách</label><label>bảng chữ cái</label><label>ngẫu nhiên</label></div>
+<div class="q" data-a="1" data-ex="Thân constructor được ủy quyền chạy trước."><b>8.</b> <code>Player() : Player{"None",0,0} { cout&lt;&lt;"B"; }</code> và ctor 3 tham số in "A". <code>Player p;</code> in ra:<label>BA</label><label>AB</label><label>A</label><label>B</label></div>
+<div class="q" data-a="3" data-ex="Mơ hồ: cả hai đều khớp lời gọi không tham số."><b>9.</b> Có cả <code>Player()</code> và <code>Player(std::string n="None")</code>, rồi <code>Player p;</code> sẽ:<label>gọi Player()</label><label>gọi bản string</label><label>lỗi lúc chạy</label><label>lỗi biên dịch do gọi mơ hồ</label></div>
+<div class="q" data-a="2" data-ex="Truyền tham chiếu không sao chép."><b>10.</b> Trường hợp nào KHÔNG gọi copy constructor?<label>truyền object theo giá trị</label><label>trả về object theo giá trị</label><label>truyền object bằng const reference</label><label><code>Player b {a};</code></label></div>
+<div class="q" data-a="1" data-ex="Phải nhận tham chiếu, nếu không sẽ đệ quy vô hạn."><b>11.</b> Chữ ký đúng của copy constructor:<label>Player(Player source)</label><label>Player(const Player &amp;source)</label><label>Player(Player *source)</label><label>void Player(const Player&amp;)</label></div>
+<div class="q" data-a="0" data-ex="Cả hai trỏ tới cùng một int trên heap."><b>12.</b> Shallow copy của lớp có <code>int *data</code> nghĩa là:<label>con trỏ của hai object trỏ cùng vùng nhớ</label><label>giá trị int được nhân bản</label><label>con trỏ bị gán nullptr</label><label>không chép gì cả</label></div>
+<div class="q" data-a="2" data-ex="Con trỏ treo / delete hai lần."><b>13.</b> Nguy hiểm chính của shallow copy khi destructor có delete:<label>biên dịch chậm</label><label>chỉ rò rỉ bộ nhớ</label><label>con trỏ treo & giải phóng hai lần</label><label>không có</label></div>
+<div class="q" data-a="3" data-ex="&& là tham chiếu r-value."><b>14.</b> Chữ ký move constructor:<label>Move(const Move &amp;src)</label><label>Move(Move src)</label><label>Move(Move *src)</label><label>Move(Move &amp;&amp;src) noexcept</label></div>
+<div class="q" data-a="1" data-ex="Nếu không, destructor của đối tượng tạm sẽ giải phóng vùng nhớ đã lấy."><b>15.</b> Trong move constructor, sau khi lấy con trỏ bạn phải:<label>delete source.data</label><label>gán source.data = nullptr</label><label>chép *source.data</label><label>gọi destructor</label></div>
+<div class="q" data-a="0" data-ex="Move{10} là đối tượng tạm."><b>16.</b> Cái nào là r-value?<label><code>Move{10}</code></label><label><code>int x</code></label><label><code>vec[0]</code></label><label><code>*ptr</code></label></div>
+<div class="q" data-a="2" data-ex="this là con trỏ tới object hiện tại."><b>17.</b> <code>this</code> là:<label>tham chiếu tới lớp</label><label>bản sao của object</label><label>con trỏ tới object hiện tại</label><label>thành viên static</label></div>
+<div class="q" data-a="3" data-ex="Object const chỉ gọi được phương thức const."><b>18.</b> <code>const Player v; v.get_name();</code> chỉ biên dịch được khi:<label>get_name là static</label><label>get_name là public</label><label>get_name trả về const</label><label>get_name được khai báo <code>const</code></label></div>
+<div class="q" data-a="1" data-ex="Biến static phải được định nghĩa một lần trong .cpp."><b>19.</b> Định nghĩa/khởi tạo <code>static int num_players;</code> ở đâu?<label>trong constructor</label><label>trong .cpp: <code>int Player::num_players {0};</code></label><label>trong main</label><label>tự động, không cần</label></div>
+<div class="q" data-a="0" data-ex="Quan hệ bạn được cho, không đối xứng, không bắc cầu."><b>20.</b> Nếu A là friend của B, và B là friend của C:<label>A KHÔNG tự động là friend của C</label><label>A là friend của C</label><label>B là friend của A</label><label>C là friend của A</label></div>
+<button onclick="checkAll('✅ Chính xác.','❌ Đáp án:','Điểm')">Chấm điểm</button><button onclick="resetAll()">Làm lại</button> <span id="score" class="score"></span>
+</section>
+
+<section><h2>Phần B – Đoán output</h2>
+<h3>B1</h3><pre><code>class Player {
+    std::string name;
+public:
+    Player(std::string n) : name{n} { cout &lt;&lt; "C:" &lt;&lt; name &lt;&lt; " "; }
+    ~Player() { cout &lt;&lt; "D:" &lt;&lt; name &lt;&lt; " "; }
+};
+int main() {
+    Player a {"A"};
+    { Player b {"B"}; }
+    Player c {"C"};
+}</code></pre>
+<details><summary>Đáp án</summary><code>C:A C:B D:B C:C D:C D:A</code> — b bị hủy khi hết khối; c và a bị hủy theo thứ tự ngược.</details>
+
+<h3>B2</h3><pre><code>class P {
+public:
+    P(int x) { cout &lt;&lt; "int "; }
+    P() : P{0} { cout &lt;&lt; "none "; }
+    P(const P &amp;s) : P{} { cout &lt;&lt; "copy "; }
+};
+void f(P p) {}
+int main() { P a; f(a); }</code></pre>
+<details><summary>Đáp án</summary><code>int none int none copy</code> — <code>P a</code> → int, none. <code>f(a)</code> sao chép → ủy quyền P{} → int, none, rồi copy.</details>
+
+<h3>B3</h3><pre><code>class Player {
+    static int count;
+public:
+    Player() { ++count; }
+    ~Player() { --count; }
+    static int get() { return count; }
+};
+int Player::count {0};
+int main() {
+    Player a, b;
+    Player *p = new Player;
+    cout &lt;&lt; Player::get();
+    delete p;
+    { Player c; cout &lt;&lt; Player::get(); }
+    cout &lt;&lt; Player::get();
+}</code></pre>
+<details><summary>Đáp án</summary><code>332</code></details>
+
+<h3>B4 – Có biên dịch được không?</h3><pre><code>class Account {
+    double balance {0};
+public:
+    double get_balance() { return balance; }
+};
+void show(const Account &amp;a) { cout &lt;&lt; a.get_balance(); }</code></pre>
+<details><summary>Đáp án</summary>❌ Không. <code>a</code> là const nhưng <code>get_balance()</code> không phải phương thức const. Sửa: <code>double get_balance() const</code>.</details>
+</section>
+
+<section><h2>Phần C – Bài tập code (file trong <code>practice/</code>)</h2>
+<table><tr><th>#</th><th>File</th><th>Yêu cầu</th></tr>
+<tr><td>1</td><td>ex01_bank_account.cpp</td><td>Lớp <code>Account</code> có name/balance private, deposit, withdraw (thất bại nếu không đủ tiền), getter const.</td></tr>
+<tr><td>2</td><td>ex02_constructors.cpp</td><td><code>Rectangle</code> dùng danh sách khởi tạo + constructor ủy quyền + tham số mặc định, in ra ctor nào chạy.</td></tr>
+<tr><td>3</td><td>ex03_header_split/</td><td>Tách <code>Student</code> thành Student.h / Student.cpp / main.cpp có include guard.</td></tr>
+<tr><td>4</td><td>ex04_deep_copy.cpp</td><td><code>IntArray</code> giữ <code>int*</code> kích thước n — viết copy ctor sâu + destructor.</td></tr>
+<tr><td>5</td><td>ex05_move.cpp</td><td>Thêm move ctor cho <code>IntArray</code>, push đối tượng tạm vào vector, quan sát output.</td></tr>
+<tr><td>6</td><td>ex06_static_counter.cpp</td><td><code>Enemy</code> với biến đếm static số object đang sống.</td></tr>
+<tr><td>7</td><td>ex07_friend.cpp</td><td><code>Point</code> + hàm friend <code>distance</code> và lớp friend <code>Debugger</code>.</td></tr>
+<tr><td>8</td><td>ex08_movies_challenge.cpp</td><td>Challenge Movies của Section 13 (một file).</td></tr></table>
+<p>Biên dịch: <code>g++ -std=c++17 -Wall ex01_bank_account.cpp -o ex01 &amp;&amp; ./ex01</code>. Lời giải: <code>practice/solutions/</code>.</p>
+<details><summary>Gợi ý – Bài 4 deep copy</summary><pre><code>IntArray(const IntArray &amp;src) : size{src.size}, data{new int[src.size]} {
+    for (size_t i = 0; i &lt; size; ++i) data[i] = src.data[i];
+}
+~IntArray() { delete [] data; }</code></pre></details>
+<details><summary>Gợi ý – Bài 5 move</summary><pre><code>IntArray(IntArray &amp;&amp;src) noexcept : size{src.size}, data{src.data} {
+    src.data = nullptr; src.size = 0;
+}</code></pre></details>
+</section>
+</main></body></html>

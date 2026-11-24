@@ -1,0 +1,1024 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Section 13 Lesson (EN)</title><link rel="stylesheet" href="style.css"></head>
+<body><header><h1>📘 Section 13 – Classes and Objects</h1><a href="index.html">Home</a><a href="lesson_vi.html">🇻🇳 Tiếng Việt</a><a href="exercises_en.html">Exercises →</a></header>
+<div class="wrap"><nav>
+<a href="#t1">1. OOP concepts</a><a href="#t2">2. Declaring classes & objects</a><a href="#t3">3. Accessing members</a><a href="#t4">4. Access modifiers</a><a href="#t5">5. Implementing methods</a><a href="#t6">6. Constructors & destructors</a><a href="#t7">7. Default constructor</a><a href="#t8">8. Overloading constructors</a><a href="#t9">9. Initialization lists</a><a href="#t10">10. Delegating constructors</a><a href="#t11">11. Default parameters</a><a href="#t12">12. Copy constructor</a><a href="#t13">13. Shallow vs deep copy</a><a href="#t14">14. Move constructor</a><a href="#t15">15. this pointer</a><a href="#t16">16. const with classes</a><a href="#t17">17. static members</a><a href="#t18">18. struct vs class</a><a href="#t19">19. friends</a><a href="#t20">20. Challenge: Movies</a><a href="#sum">Summary</a>
+</nav><main>
+<div class="note">💡 Running examples: the complete examples at the end of each section assume <code>#include &lt;iostream&gt;</code>, <code>&lt;string&gt;</code>, <code>&lt;vector&gt;</code>, <code>&lt;utility&gt;</code>, and <code>using namespace std;</code>.</div>
+
+<section id="t1"><h2>1. Object-Oriented Programming concepts</h2>
+<p>Procedural programming focuses on <b>functions</b>; data is passed around separately. As programs grow, this becomes hard to maintain. OOP models the program as <b>classes</b> and <b>objects</b>.</p>
+<ul><li><b>Class</b>: a blueprint / user-defined type. Contains <i>attributes</i> (data) and <i>methods</i> (functions). E.g. <code>Account</code>, <code>Player</code>, <code>std::string</code>, <code>std::vector</code>.</li>
+<li><b>Object</b>: a concrete instance of a class. <code>Account frank_account;</code></li>
+<li><b>Encapsulation</b>: bundle data + operations together. <b>Information hiding</b>: hide implementation, expose only an interface.</li>
+<li>Also: reusability, inheritance, polymorphism (later sections).</li></ul>
+<div class="ex">
+<div class="ex-title">▶ Complete Example &amp; Output</div>
+<pre><code>class Account {
+public:
+    string name;
+    double balance;
+};
+
+int main() {
+    Account frank;  frank.name = "Frank";  frank.balance = 100;
+    Account jim;    jim.name = "Jim";      jim.balance = 2500;
+    cout &lt;&lt; frank.name &lt;&lt; ": " &lt;&lt; frank.balance &lt;&lt; endl;
+    cout &lt;&lt; jim.name &lt;&lt; ": " &lt;&lt; jim.balance &lt;&lt; endl;
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Frank: 100
+Jim: 2500</pre>
+<p class="ex-why"><b>Why this output:</b> One <code>Account</code> class, many independent objects — each object holds its own data.</p>
+</div></section>
+
+<section id="t2"><h2>2. Declaring a class and creating objects</h2>
+<pre><code>class Player {
+    // attributes
+    std::string name {"Player"};
+    int health {100};
+    int xp {3};
+    // methods
+    void talk(std::string);
+    bool is_dead();
+};   // ← don't forget the semicolon!
+
+Player frank;                 // object on the stack
+Player players[] {frank, hero};   // array of objects
+std::vector&lt;Player&gt; vec {frank};
+Player *enemy = new Player;   // object on the heap
+delete enemy;</code></pre>
+<div class="note">The class is a type; nothing is allocated until you create an object.</div>
+<h3><code>{}</code> vs <code>()</code> initialization pitfalls</h3>
+<pre><code>std::vector&lt;int&gt; a (10);   // 10 elements, all 0
+std::vector&lt;int&gt; b {10};   // 1 element = 10  (initializer_list wins!)
+int x {3.7};               // ❌ error: {} forbids narrowing
+int y (3.7);               // compiles, y = 3 (data lost)
+
+struct Point { int x; int y; };    // aggregate: no ctors, all public
+Point p {1, 2};
+Point q {.x = 1, .y = 2};          // designated initializers (C++20)</code></pre>
+<div class="note">Default to <code>{}</code> (safer), unless the class has an <code>std::initializer_list</code> constructor and you want a different one.</div>
+<div class="ex">
+<div class="ex-title">▶ Complete Example &amp; Output</div>
+<pre><code>class Player {
+public:
+    string name {"Player"};
+    int health {100};
+};
+
+int main() {
+    Player frank;                      // stack
+    Player *enemy = new Player;        // heap
+    vector&lt;Player&gt; team {frank, *enemy};
+    cout &lt;&lt; frank.name &lt;&lt; " " &lt;&lt; frank.health &lt;&lt; endl;
+    cout &lt;&lt; "Team size: " &lt;&lt; team.size() &lt;&lt; endl;
+    delete enemy;
+
+    vector&lt;int&gt; a (10), b {10};
+    cout &lt;&lt; a.size() &lt;&lt; " " &lt;&lt; b.size() &lt;&lt; endl;
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Player 100
+Team size: 2
+10 1</pre>
+<p class="ex-why"><b>Why this output:</b> Objects can live on the stack, the heap, or inside a vector. The last line shows the <code>()</code> vs <code>{}</code> trap: <code>a(10)</code> is 10 elements, <code>b{10}</code> is 1 element.</p>
+</div></section>
+
+<section id="t3"><h2>3. Accessing class members</h2>
+<p>Use the <b>dot operator</b> <code>.</code> with an object, and the <b>arrow operator</b> <code>-&gt;</code> with a pointer.</p>
+<pre><code>Account frank_account;
+frank_account.balance;      // dot
+frank_account.deposit(1000.0);
+
+Account *p = new Account();
+(*p).balance;   // dereference then dot
+p-&gt;deposit(1000.0); // arrow – same thing
+delete p;</code></pre>
+<div class="warn">In <code>AccessingClassMembers</code> all members are <code>public</code> so this compiles. With private members it would be an error.</div>
+<div class="ex">
+<div class="ex-title">▶ Complete Example &amp; Output</div>
+<pre><code>class Account {
+public:
+    string name;
+    double balance {0};
+    void deposit(double amount) { balance += amount; }
+};
+
+int main() {
+    Account a;
+    a.name = "Frank";
+    a.deposit(1000);
+    cout &lt;&lt; a.name &lt;&lt; " has " &lt;&lt; a.balance &lt;&lt; endl;
+
+    Account *p = new Account;
+    p-&gt;name = "Jim";
+    p-&gt;deposit(50);
+    (*p).deposit(25);
+    cout &lt;&lt; p-&gt;name &lt;&lt; " has " &lt;&lt; p-&gt;balance &lt;&lt; endl;
+    delete p;
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Frank has 1000
+Jim has 75</pre>
+<p class="ex-why"><b>Why this output:</b> Use <code>.</code> with objects and <code>-&gt;</code> with pointers. <code>(*p).deposit(25)</code> and <code>p-&gt;deposit(25)</code> are identical.</p>
+</div></section>
+
+<section id="t4"><h2>4. Public and private (access modifiers)</h2>
+<table><tr><th>Modifier</th><th>Accessible from</th></tr>
+<tr><td><code>public</code></td><td>everywhere</td></tr>
+<tr><td><code>private</code></td><td>only members/friends of the class (default for <code>class</code>)</td></tr>
+<tr><td><code>protected</code></td><td>class + derived classes (inheritance)</td></tr></table>
+<pre><code>class Player {
+private:
+    std::string name; int health; int xp;
+public:
+    void talk(std::string text) { std::cout &lt;&lt; name &lt;&lt; " says " &lt;&lt; text; }
+    bool is_dead();
+};
+Player frank;
+frank.name = "Frank";   // ❌ compiler error: private
+frank.talk("Hello");    // ✅</code></pre>
+<h3>Class invariants &amp; validating setters</h3>
+<p>The real reason for <code>private</code>: the class guarantees its data is <b>always valid</b> (an invariant), e.g. balance is never negative. Constructors establish the invariant; every public method must preserve it.</p>
+<pre><code>class Account {
+    std::string name;
+    double balance {0};
+public:
+    Account(std::string n, double b) : name{std::move(n)}, balance{b} {
+        if (balance &lt; 0) throw std::invalid_argument("balance &lt; 0");
+    }
+    bool withdraw(double amount) {
+        if (amount &lt;= 0 || amount &gt; balance) return false;   // keep invariant
+        balance -= amount;
+        return true;
+    }
+    double get_balance() const { return balance; }
+};</code></pre>
+<div class="note">Blind getters/setters for every field (an unchecked <code>set_balance(double)</code>) almost defeat encapsulation. Prefer meaningful operations: <code>deposit</code>, <code>withdraw</code>.</div>
+<div class="ex">
+<div class="ex-title">▶ Complete Example &amp; Output</div>
+<pre><code>class Player {
+private:
+    string name {"Frank"};
+    int health {100};
+public:
+    void talk(string text) { cout &lt;&lt; name &lt;&lt; " says " &lt;&lt; text &lt;&lt; endl; }
+    void take_damage(int d) {
+        health -= d;
+        if (health &lt; 0) health = 0;
+    }
+    int get_health() { return health; }
+};
+
+int main() {
+    Player frank;
+    frank.talk("Hello");
+    frank.take_damage(130);
+    cout &lt;&lt; "Health: " &lt;&lt; frank.get_health() &lt;&lt; endl;
+    // frank.health = -30;   // compile error: private
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Frank says Hello
+Health: 0</pre>
+<p class="ex-why"><b>Why this output:</b> Outside code can't touch <code>health</code> directly, only through <code>take_damage</code> — so the class guarantees health never goes negative (130 damage still gives 0).</p>
+</div></section>
+
+<section id="t5"><h2>5. Implementing member methods</h2>
+<p>Methods can be implemented <b>inside</b> the class (implicitly inline) or <b>outside</b> using the scope resolution operator <code>Class::method</code>. Real projects separate the <b>specification</b> (<code>.h</code>) and <b>implementation</b> (<code>.cpp</code>).</p>
+<pre><code>// Account.h
+#ifndef ACCOUNT_H      // include guard (or #pragma once)
+#define ACCOUNT_H
+#include &lt;string&gt;
+class Account {
+private:
+    std::string name; double balance;
+public:
+    void set_balance(double bal) { balance = bal; }  // inline
+    double get_balance() { return balance; }
+    void set_name(std::string n);
+    std::string get_name();
+    bool deposit(double amount);
+    bool withdraw(double amount);
+};
+#endif
+
+// Account.cpp
+#include "Account.h"
+void Account::set_name(std::string n) { name = n; }
+std::string Account::get_name() { return name; }
+bool Account::deposit(double amount) { balance += amount; return true; }
+bool Account::withdraw(double amount) {
+    if (balance - amount &gt;= 0) { balance -= amount; return true; }
+    return false;
+}</code></pre>
+<div class="note">Include guards prevent the same header from being processed twice. Never <code>#include</code> a .cpp file.</div>
+<h3>Header hygiene</h3>
+<ul>
+<li>Guard names like <code>_ACCOUNT_H_</code> (underscore + capital) are actually <b>reserved</b> for the implementation. Use <code>ACCOUNT_H</code> or <code>#pragma once</code>.</li>
+<li><b>Never</b> put <code>using namespace std;</code> in a header — it leaks into every file that includes it. Write <code>std::string</code>.</li>
+<li>Headers should include only what they need; the rest goes in the .cpp.</li>
+<li>Functions defined inside the class body are implicitly inline → fine in a header. Functions defined <b>outside</b> the class but in a header need <code>inline</code>, otherwise you get "multiple definition" linker errors.</li>
+<li>Building multiple files: <code>g++ -std=c++17 -Wall main.cpp Account.cpp -o app</code>.</li>
+</ul>
+<div class="ex">
+<div class="ex-title">▶ Complete Example &amp; Output</div>
+<pre><code>class Account {
+private:
+    string name;
+    double balance {0};
+public:
+    void set_name(string n);
+    string get_name();
+    void deposit(double amount) { balance += amount; }   // inline
+    bool withdraw(double amount);
+};
+
+void Account::set_name(string n) { name = n; }
+string Account::get_name() { return name; }
+bool Account::withdraw(double amount) {
+    if (balance - amount &gt;= 0) { balance -= amount; return true; }
+    return false;
+}
+
+int main() {
+    Account a;
+    a.set_name("Frank");
+    a.deposit(100);
+    cout &lt;&lt; boolalpha;
+    cout &lt;&lt; a.get_name() &lt;&lt; " withdraw 30: " &lt;&lt; a.withdraw(30) &lt;&lt; endl;
+    cout &lt;&lt; a.get_name() &lt;&lt; " withdraw 500: " &lt;&lt; a.withdraw(500) &lt;&lt; endl;
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Frank withdraw 30: true
+Frank withdraw 500: false</pre>
+<p class="ex-why"><b>Why this output:</b> Methods are declared in the class and defined outside with <code>Account::</code>. (Single file here for easy running; real projects split .h / .cpp.)</p>
+</div></section>
+
+<section id="t6"><h2>6. Constructors and destructors</h2>
+<ul><li><b>Constructor</b>: special method called automatically when an object is created. Same name as the class, <b>no return type</b>, can be overloaded.</li>
+<li><b>Destructor</b>: called automatically when an object is destroyed (goes out of scope, or <code>delete</code>). Name <code>~Class()</code>, no params, no return, <b>only one</b>. Used to release resources (memory, files…).</li></ul>
+<pre><code>class Player {
+public:
+    Player()                         { cout &lt;&lt; "No args constructor called\n"; }
+    Player(std::string name)          { cout &lt;&lt; "String arg constructor called\n"; }
+    Player(std::string name, int h, int xp) { cout &lt;&lt; "Three args constructor called\n"; }
+    ~Player()                        { cout &lt;&lt; "Destructor called for " &lt;&lt; name &lt;&lt; endl; }
+};
+{
+    Player slayer;
+    slayer.set_name("Slayer");
+}   // destructor for Slayer called here
+Player *enemy = new Player;
+delete enemy;  // destructor called</code></pre>
+<div class="note">Local objects are destroyed in <b>reverse order</b> of creation.</div>
+<h3>Object lifetime & RAII</h3>
+<p><b>RAII</b> (Resource Acquisition Is Initialization): acquire a resource in the constructor, release it in the destructor. Because destructors run automatically when objects go out of scope (even when exceptions are thrown), resources never leak.</p>
+<pre><code>{
+    std::ofstream file {"log.txt"};   // opens in ctor
+    file &lt;&lt; "hello";
+}   // closed automatically by destructor
+
+auto p = std::make_unique&lt;Player&gt;("Hero");   // no manual delete needed</code></pre>
+<table><tr><th>Object</th><th>Destroyed when</th></tr>
+<tr><td>Local (stack)</td><td>end of its block, reverse order of creation</td></tr>
+<tr><td>Heap (<code>new</code>)</td><td>only when you call <code>delete</code> (or smart pointer dies)</td></tr>
+<tr><td>Temporary</td><td>end of the full expression</td></tr>
+<tr><td>static / global</td><td>end of program</td></tr></table>
+<div class="ex">
+<div class="ex-title">▶ Complete Example &amp; Output</div>
+<pre><code>class Player {
+    string name;
+public:
+    Player(string n) : name{n} { cout &lt;&lt; "Constructor: " &lt;&lt; name &lt;&lt; endl; }
+    ~Player() { cout &lt;&lt; "Destructor: " &lt;&lt; name &lt;&lt; endl; }
+};
+
+int main() {
+    {
+        Player a {"A"};
+        Player b {"B"};
+        cout &lt;&lt; "--- end of block ---" &lt;&lt; endl;
+    }
+    Player *h = new Player {"Heap"};
+    delete h;
+    cout &lt;&lt; "--- end of main ---" &lt;&lt; endl;
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Constructor: A
+Constructor: B
+--- end of block ---
+Destructor: B
+Destructor: A
+Constructor: Heap
+Destructor: Heap
+--- end of main ---</pre>
+<p class="ex-why"><b>Why this output:</b> Watch the order: A then B are built; leaving the block destroys them in <b>reverse</b>, B then A. The heap object dies only on <code>delete</code>.</p>
+</div></section>
+
+<section id="t7"><h2>7. The default constructor</h2>
+<p>A constructor that takes no arguments. If you write <b>no constructors at all</b>, the compiler generates one (which leaves built-in members uninitialized!). Once you write <i>any</i> constructor, the compiler <b>no longer</b> generates the default one.</p>
+<pre><code>class Account {
+    std::string name; double balance;
+public:
+    Account(std::string n, double b) : name{n}, balance{b} {}
+};
+Account a;            // ❌ error: no default constructor
+Account b {"Bob", 10}; // ✅</code></pre>
+<h3><code>= default</code> and <code>= delete</code></h3>
+<pre><code>class Account {
+public:
+    Account() = default;                          // ask compiler to generate it
+    Account(const Account &amp;) = delete;            // forbid copying
+    Account &amp;operator=(const Account &amp;) = delete;
+};
+Account a;
+Account b {a};   // ❌ error: use of deleted function</code></pre>
+<p>Use <code>= delete</code> for objects that must be unique (file handle, socket, bank account ID…).</p>
+<div class="ex">
+<div class="ex-title">▶ Complete Example &amp; Output</div>
+<pre><code>class Account {
+    string name;
+    double balance;
+public:
+    Account() : name{"None"}, balance{0} { cout &lt;&lt; "Default ctor" &lt;&lt; endl; }
+    Account(string n, double b) : name{n}, balance{b} { cout &lt;&lt; "2-arg ctor" &lt;&lt; endl; }
+    void show() { cout &lt;&lt; name &lt;&lt; ": " &lt;&lt; balance &lt;&lt; endl; }
+};
+
+int main() {
+    Account a;
+    a.show();
+    Account b {"Bob", 10};
+    b.show();
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Default ctor
+None: 0
+2-arg ctor
+Bob: 10</pre>
+<p class="ex-why"><b>Why this output:</b> <code>Account a;</code> calls the default (no-arg) constructor. Remove it and <code>Account a;</code> no longer compiles.</p>
+</div></section>
+
+<section id="t8"><h2>8. Overloading constructors</h2>
+<p>Like functions, constructors can be overloaded as long as each has a unique signature. In the zip: <code>Player()</code>, <code>Player(std::string)</code>, <code>Player(std::string,int,int)</code>.</p>
+<pre><code>Player empty;                      // Player()
+Player frank {"Frank"};            // Player(std::string)
+Player villain {"Villain", 100, 55}; // 3 args</code></pre>
+<h3><code>explicit</code> constructors</h3>
+<p>A single-argument constructor acts as an <b>implicit conversion</b>. This can cause surprising bugs:</p>
+<pre><code>class Account { public: Account(double balance); };
+void print(Account a);
+print(500.0);   // compiles! 500.0 silently converted to Account
+
+class Account2 { public: explicit Account2(double balance); };
+print2(500.0);            // ❌ error
+print2(Account2{500.0});  // ✅ intent is clear</code></pre>
+<div class="note">Guideline: mark single-argument constructors <code>explicit</code> unless you really want the conversion.</div>
+<div class="ex">
+<div class="ex-title">▶ Complete Example &amp; Output</div>
+<pre><code>class Player {
+    string name; int health; int xp;
+public:
+    Player() : name{"None"}, health{0}, xp{0} { cout &lt;&lt; "Player()" &lt;&lt; endl; }
+    Player(string n) : name{n}, health{0}, xp{0} { cout &lt;&lt; "Player(string)" &lt;&lt; endl; }
+    Player(string n, int h, int x) : name{n}, health{h}, xp{x} {
+        cout &lt;&lt; "Player(string, int, int)" &lt;&lt; endl;
+    }
+};
+
+int main() {
+    Player empty;
+    Player frank {"Frank"};
+    Player villain {"Villain", 100, 55};
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Player()
+Player(string)
+Player(string, int, int)</pre>
+<p class="ex-why"><b>Why this output:</b> The compiler picks the constructor by the number and types of arguments.</p>
+</div></section>
+
+<section id="t9"><h2>9. Constructor initialization lists</h2>
+<p>Initialize members <b>before</b> the constructor body runs — true initialization instead of assignment. More efficient, and required for <code>const</code> and reference members.</p>
+<pre><code>// Assignment (old way)
+Player::Player() { name = "None"; health = 0; xp = 0; }
+
+// Initialization list (better)
+Player::Player()
+    : name{"None"}, health{0}, xp{0} { }
+
+Player::Player(std::string name_val, int health_val, int xp_val)
+    : name{name_val}, health{health_val}, xp{xp_val} { }</code></pre>
+<div class="warn">Members are initialized in the order they are <b>declared in the class</b>, not the order in the list.</div>
+<h3>Default member initializers (C++11)</h3>
+<p>You can give members a default value right in the class. The value is used by any constructor that doesn't initialize that member in its init list → no more garbage values.</p>
+<pre><code>class Player {
+    std::string name {"None"};
+    int health {100};
+    int xp {0};
+public:
+    Player() = default;                       // uses the defaults above
+    Player(std::string n) : name{n} {}        // health=100, xp=0
+};</code></pre>
+<div class="note">Priority: init list &gt; in-class initializer &gt; nothing (built-in types left uninitialized!).</div>
+<div class="ex">
+<div class="ex-title">▶ Complete Example &amp; Output</div>
+<pre><code>class Player {
+    const int id;
+    string name;
+    int health {100};
+public:
+    Player(int i, string n) : id{i}, name{n} { }
+    void show() const { cout &lt;&lt; "#" &lt;&lt; id &lt;&lt; " " &lt;&lt; name &lt;&lt; " hp=" &lt;&lt; health &lt;&lt; endl; }
+};
+
+int main() {
+    Player p {1, "Frank"};
+    p.show();
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">#1 Frank hp=100</pre>
+<p class="ex-why"><b>Why this output:</b> <code>id</code> is <code>const</code>, so it <b>must</b> be set in the initialization list (writing <code>id = i;</code> in the body won't compile), while <code>health {100}</code> falls back to its in-class default member initializer.</p>
+</div></section>
+
+<section id="t10"><h2>10. Delegating constructors</h2>
+<p>A constructor can call another constructor of the same class in its initialization list → reduces duplicated code.</p>
+<pre><code>Player::Player(std::string name_val, int health_val, int xp_val)
+    : name{name_val}, health{health_val}, xp{xp_val} {
+    cout &lt;&lt; "Three-args constructor" &lt;&lt; endl;
+}
+Player::Player() : Player{"None", 0, 0} {
+    cout &lt;&lt; "No-args constructor" &lt;&lt; endl;
+}
+Player::Player(std::string name_val) : Player{name_val, 0, 0} {
+    cout &lt;&lt; "One-arg constructor" &lt;&lt; endl;
+}</code></pre>
+<p>Output for <code>Player empty;</code>: first <i>Three-args constructor</i>, then <i>No-args constructor</i> (the delegated ctor's body runs first).</p>
+<div class="ex">
+<div class="ex-title">▶ Complete Example &amp; Output</div>
+<pre><code>class Player {
+    string name; int health; int xp;
+public:
+    Player(string n, int h, int x) : name{n}, health{h}, xp{x} {
+        cout &lt;&lt; "Three-args constructor" &lt;&lt; endl;
+    }
+    Player() : Player{"None", 0, 0} { cout &lt;&lt; "No-args constructor" &lt;&lt; endl; }
+    Player(string n) : Player{n, 0, 0} { cout &lt;&lt; "One-arg constructor" &lt;&lt; endl; }
+};
+
+int main() {
+    Player empty;
+    cout &lt;&lt; "---" &lt;&lt; endl;
+    Player frank {"Frank"};
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Three-args constructor
+No-args constructor
+---
+Three-args constructor
+One-arg constructor</pre>
+<p class="ex-why"><b>Why this output:</b> The delegated-to (3-arg) constructor runs <b>first</b>, then the body of the calling constructor.</p>
+</div></section>
+
+<section id="t11"><h2>11. Default constructor parameters</h2>
+<p>One constructor with default arguments can replace several overloads.</p>
+<pre><code>class Player {
+public:
+    Player(std::string name_val = "None", int health_val = 0, int xp_val = 0);
+};
+Player::Player(std::string name_val, int health_val, int xp_val)
+    : name{name_val}, health{health_val}, xp{xp_val} { }
+
+Player empty;            // None, 0, 0
+Player frank {"Frank"};  // Frank, 0, 0
+Player hero {"Hero", 100}; // Hero, 100, 0</code></pre>
+<div class="warn">Defaults are written in the declaration (.h) only. Don't also add <code>Player()</code> – the call would be <b>ambiguous</b>.</div>
+<div class="ex">
+<div class="ex-title">▶ Complete Example &amp; Output</div>
+<pre><code>class Player {
+    string name; int health; int xp;
+public:
+    Player(string n = "None", int h = 0, int x = 0) : name{n}, health{h}, xp{x} { }
+    void show() const { cout &lt;&lt; name &lt;&lt; " " &lt;&lt; health &lt;&lt; " " &lt;&lt; xp &lt;&lt; endl; }
+};
+
+int main() {
+    Player a;                       a.show();
+    Player b {"Frank"};             b.show();
+    Player c {"Hero", 100};         c.show();
+    Player d {"Villain", 100, 55};  d.show();
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">None 0 0
+Frank 0 0
+Hero 100 0
+Villain 100 55</pre>
+<p class="ex-why"><b>Why this output:</b> Just <b>one</b> constructor, callable with 0, 1, 2 or 3 arguments; missing ones take the defaults.</p>
+</div></section>
+
+<section id="t12"><h2>12. Copy constructor</h2>
+<p>Called when an object is created as a copy of another object of the same type:</p>
+<ul><li>passing an object <b>by value</b> to a function</li><li>returning an object by value</li><li>constructing one object from another: <code>Player b {a};</code></li></ul>
+<p>If you don't provide one, the compiler generates a <b>memberwise copy</b>. Signature: <code>Type(const Type &amp;source);</code></p>
+<pre><code>Player::Player(const Player &amp;source)
+    : name{source.name}, health{source.health}, xp{source.xp} {
+    cout &lt;&lt; "Copy constructor - made copy of: " &lt;&lt; source.name &lt;&lt; endl;
+}
+// or delegating:
+Player::Player(const Player &amp;source)
+    : Player{source.name, source.health, source.xp} { }
+
+void display_player(Player p) { ... }   // p is a copy!
+Player empty {"XXXXXX", 100, 50};
+Player my_new_object {empty};   // copy ctor
+display_player(empty);          // copy ctor</code></pre>
+<div class="note">Pass by <code>const &amp;</code> when you don't need a copy, to avoid this cost.</div>
+<h3>Copy assignment vs copy constructor</h3>
+<p>The copy constructor creates a <b>new</b> object. The copy assignment operator overwrites an <b>existing</b> one. Both are generated by default (shallow!).</p>
+<pre><code>Deep a {100};
+Deep b {a};    // copy CONSTRUCTOR (b is new)
+Deep c {5};
+c = a;         // copy ASSIGNMENT  (c already exists)
+
+Deep &amp;Deep::operator=(const Deep &amp;rhs) {
+    if (this == &amp;rhs) return *this;   // self-assignment check
+    delete data;                       // free old resource
+    data = new int{*rhs.data};         // deep copy
+    return *this;
+}
+Deep &amp;Deep::operator=(Deep &amp;&amp;rhs) noexcept {   // move assignment
+    if (this == &amp;rhs) return *this;
+    delete data;
+    data = rhs.data;
+    rhs.data = nullptr;
+    return *this;
+}</code></pre>
+<p>Covered in depth in Section 14 (Operator Overloading).</p>
+<div class="ex">
+<div class="ex-title">▶ Complete Example &amp; Output</div>
+<pre><code>class Player {
+    string name;
+public:
+    Player(string n) : name{n} { }
+    Player(const Player &amp;src) : name{src.name} { cout &lt;&lt; "Copy ctor: " &lt;&lt; name &lt;&lt; endl; }
+    string get_name() const { return name; }
+};
+
+void by_value(Player p)      { cout &lt;&lt; "by_value: " &lt;&lt; p.get_name() &lt;&lt; endl; }
+void by_ref(const Player &amp;p) { cout &lt;&lt; "by_ref: " &lt;&lt; p.get_name() &lt;&lt; endl; }
+
+int main() {
+    Player a {"Frank"};
+    Player b {a};
+    by_value(a);
+    by_ref(a);
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Copy ctor: Frank
+Copy ctor: Frank
+by_value: Frank
+by_ref: Frank</pre>
+<p class="ex-why"><b>Why this output:</b> The copy constructor runs twice: building <code>b</code> from <code>a</code>, and passing by value. Passing by <code>const &amp;</code> makes <b>no</b> copy.</p>
+</div></section>
+
+<section id="t13"><h2>13. Shallow copy vs deep copy</h2>
+<p>When a class has a <b>raw pointer</b> member, the default memberwise copy copies the <i>pointer</i>, not what it points to → two objects share the same heap memory.</p>
+<pre><code>class Shallow {
+    int *data;
+public:
+    Shallow(int d) { data = new int; *data = d; }
+    Shallow(const Shallow &amp;source) : data{source.data} {   // SHALLOW
+        cout &lt;&lt; "Copy constructor - shallow copy\n";
+    }
+    ~Shallow() { delete data; cout &lt;&lt; "Destructor freeing data\n"; }
+};
+void display_shallow(Shallow s) { ... }   // s destroyed at end → deletes shared data!
+Shallow obj1 {100};
+display_shallow(obj1);   // obj1.data now dangling
+Shallow obj2 {obj1};
+obj2.set_data_value(1000);   // 💥 undefined behaviour, double delete → crash</code></pre>
+<p><b>Deep copy</b>: allocate new storage and copy the <i>value</i>.</p>
+<pre><code>Deep::Deep(const Deep &amp;source) {
+    data = new int;
+    *data = *source.data;
+}
+// or delegate:
+Deep::Deep(const Deep &amp;source) : Deep{*source.data} { }</code></pre>
+<div class="note">Rule of three: if you need a custom destructor, you probably need a custom copy constructor and copy assignment too.</div>
+<h3>Rule of Zero / Three / Five</h3>
+<table><tr><th>Rule</th><th>Meaning</th></tr>
+<tr><td><b>Rule of Three</b></td><td>If you define one of: destructor, copy ctor, copy assignment → define all three.</td></tr>
+<tr><td><b>Rule of Five</b> (C++11)</td><td>Plus move ctor and move assignment.</td></tr>
+<tr><td><b>Rule of Zero</b> ⭐</td><td>Best: don't manage raw resources at all. Use <code>std::string</code>, <code>std::vector</code>, <code>std::unique_ptr</code> → the compiler-generated versions are correct, you write none of the five.</td></tr></table>
+<pre><code>class IntArray {               // Rule of Zero version of the Deep/Move examples
+    std::vector&lt;int&gt; data;     // copy = deep, move = cheap, no destructor needed
+};</code></pre>
+<div class="ex">
+<div class="ex-title">▶ Complete Example &amp; Output</div>
+<pre><code>class Deep {
+    int *data;
+public:
+    Deep(int d) : data{new int{d}} { }
+    Deep(const Deep &amp;src) : data{new int{*src.data}} { cout &lt;&lt; "Deep copy" &lt;&lt; endl; }
+    ~Deep() { delete data; }
+    void set(int d) { *data = d; }
+    int get() const { return *data; }
+};
+
+int main() {
+    Deep a {100};
+    Deep b {a};
+    b.set(999);
+    cout &lt;&lt; "a = " &lt;&lt; a.get() &lt;&lt; ", b = " &lt;&lt; b.get() &lt;&lt; endl;
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Deep copy
+a = 100, b = 999</pre>
+<p class="ex-why"><b>Why this output:</b> With a deep copy, changing <code>b</code> doesn't affect <code>a</code>. With a shallow copy, <code>a</code> would also show 999 and the program would crash from a double <code>delete</code>.</p>
+</div></section>
+
+<section id="t14"><h2>14. Move constructor (C++11)</h2>
+<p>Copying is expensive for temporaries (r-values) like <code>Move{10}</code>. A move constructor <b>steals</b> the resource of a temporary instead of copying it.</p>
+<ul><li>l-value: has a name/address (<code>int x</code>). r-value: temporary (<code>10</code>, <code>Move{10}</code>, <code>x+y</code>).</li>
+<li><code>int &amp;</code> = l-value reference; <code>int &amp;&amp;</code> = r-value reference.</li></ul>
+<pre><code>Move::Move(Move &amp;&amp;source) noexcept
+    : data{source.data} {        // steal the pointer
+    source.data = nullptr;        // null out source!
+    cout &lt;&lt; "Move constructor - moving resource: " &lt;&lt; *data &lt;&lt; endl;
+}
+Move::~Move() {
+    if (data != nullptr) cout &lt;&lt; "Destructor freeing data for: " &lt;&lt; *data &lt;&lt; endl;
+    else cout &lt;&lt; "Destructor freeing data for nullptr" &lt;&lt; endl;
+    delete data;   // delete nullptr is safe
+}
+vector&lt;Move&gt; vec;
+vec.push_back(Move{10});   // move ctor used instead of copy</code></pre>
+<div class="warn">Always set the source pointer to <code>nullptr</code>, otherwise the temporary's destructor will free the stolen memory. Mark it <code>noexcept</code> so <code>std::vector</code> uses it when resizing.</div>
+<h3><code>std::move</code> – when is the move constructor called?</h3>
+<p>The move ctor is chosen when the source is an <b>r-value</b>: a temporary, a returned local, or something cast with <code>std::move</code> (from <code>&lt;utility&gt;</code>).</p>
+<pre><code>Move a {10};
+Move b {a};             // copy (a is an l-value)
+Move c {std::move(a)};  // move – a is now "empty", don't use its value!
+vec.push_back(Move{20});    // move (temporary)
+vec.emplace_back(30);       // constructs in place – no copy, no move</code></pre>
+<div class="warn"><code>std::move</code> doesn't move anything itself; it only casts to <code>T&amp;&amp;</code>. Also, compilers often apply <b>copy elision</b> (RVO), so you may see fewer copy/move messages than expected — that's normal.</div>
+<div class="ex">
+<div class="ex-title">▶ Complete Example &amp; Output</div>
+<pre><code>class Move {
+    int *data;
+public:
+    Move(int d) : data{new int{d}} { cout &lt;&lt; "Ctor " &lt;&lt; d &lt;&lt; endl; }
+    Move(const Move &amp;s) : data{new int{*s.data}} { cout &lt;&lt; "Copy " &lt;&lt; *data &lt;&lt; endl; }
+    Move(Move &amp;&amp;s) noexcept : data{s.data} {
+        s.data = nullptr;
+        cout &lt;&lt; "Move " &lt;&lt; *data &lt;&lt; endl;
+    }
+    ~Move() {
+        if (data) cout &lt;&lt; "Dtor " &lt;&lt; *data &lt;&lt; endl;
+        else      cout &lt;&lt; "Dtor nullptr" &lt;&lt; endl;
+        delete data;
+    }
+};
+
+int main() {
+    Move a {10};
+    Move b {a};
+    Move c {std::move(a)};
+    cout &lt;&lt; "--- end ---" &lt;&lt; endl;
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Ctor 10
+Copy 10
+Move 10
+--- end ---
+Dtor 10
+Dtor 10
+Dtor nullptr</pre>
+<p class="ex-why"><b>Why this output:</b> <code>b{a}</code> copies (new allocation), <code>c{std::move(a)}</code> just steals <code>a</code>'s pointer, leaving <code>a</code> with <code>nullptr</code>. Destruction order: c, b, a.</p>
+</div></section>
+
+<section id="t15"><h2>15. The <code>this</code> pointer</h2>
+<p><code>this</code> is a keyword: a pointer to the current object, available inside member methods. Uses: disambiguate members from parameters, pass the object, compare objects.</p>
+<pre><code>void Account::set_balance(double balance) {
+    this-&gt;balance = balance;   // member = parameter
+}
+int Player::compare(const Player &amp;other) {
+    if (this == &amp;other) cout &lt;&lt; "The same object" &lt;&lt; endl;
+}</code></pre>
+<div class="ex">
+<div class="ex-title">▶ Complete Example &amp; Output</div>
+<pre><code>class Account {
+    double balance {0};
+public:
+    void set_balance(double balance) { this-&gt;balance = balance; }
+    double get() const { return balance; }
+    bool same(const Account &amp;o) const { return this == &amp;o; }
+};
+
+int main() {
+    Account a, b;
+    a.set_balance(500);
+    cout &lt;&lt; a.get() &lt;&lt; endl;
+    cout &lt;&lt; boolalpha &lt;&lt; a.same(a) &lt;&lt; " " &lt;&lt; a.same(b) &lt;&lt; endl;
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">500
+true false</pre>
+<p class="ex-why"><b>Why this output:</b> <code>this-&gt;balance</code> is the member, <code>balance</code> is the parameter. <code>this == &amp;o</code> checks whether both refer to the same object.</p>
+</div></section>
+
+<section id="t16"><h2>16. Using <code>const</code> with classes</h2>
+<p>A <code>const</code> object can only call <b>const methods</b> — methods that promise not to modify the object.</p>
+<pre><code>class Player {
+public:
+    std::string get_name() const { return name; }   // const-correct
+    void set_name(std::string n) { name = n; }
+};
+const Player villain {"Villain", 100, 55};
+villain.set_name("Nice guy");    // ❌ error
+cout &lt;&lt; villain.get_name();      // ✅ only because get_name is const
+
+void display_player_name(const Player &amp;p) {
+    cout &lt;&lt; p.get_name() &lt;&lt; endl;   // requires const method
+}</code></pre>
+<div class="note">Rule: mark every getter / method that doesn't modify state as <code>const</code>.</div>
+<h3><code>mutable</code> and const overloading</h3>
+<p><code>mutable</code> lets a member change even inside a const method — for data that isn't part of the logical state (caches, counters, mutexes).</p>
+<pre><code>class Movie {
+    std::string name;
+    mutable int times_queried {0};
+public:
+    const std::string &amp;get_name() const { ++times_queried; return name; }
+};</code></pre>
+<p>Methods can be overloaded on <code>const</code> alone; const objects call the const version:</p>
+<pre><code>class Movies {
+    std::vector&lt;Movie&gt; movies;
+public:
+    Movie &amp;at(size_t i)             { return movies.at(i); }   // writable
+    const Movie &amp;at(size_t i) const { return movies.at(i); }   // read-only
+};</code></pre>
+<div class="note">Returning <code>const std::string &amp;</code> avoids a copy — but never return a reference to a local variable!</div>
+<div class="ex">
+<div class="ex-title">▶ Complete Example &amp; Output</div>
+<pre><code>class Player {
+    string name;
+public:
+    Player(string n) : name{n} { }
+    string get_name() const { return name; }
+    void set_name(string n) { name = n; }
+};
+
+void show(const Player &amp;p) { cout &lt;&lt; "Name: " &lt;&lt; p.get_name() &lt;&lt; endl; }
+
+int main() {
+    const Player villain {"Villain"};
+    show(villain);
+    // villain.set_name("X");   // compile error: villain is const
+
+    Player hero {"Hero"};
+    hero.set_name("Super Hero");
+    show(hero);
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Name: Villain
+Name: Super Hero</pre>
+<p class="ex-why"><b>Why this output:</b> <code>show</code> takes <code>const Player &amp;</code>, so it can only call <code>get_name()</code> because it's a <code>const</code> method. Drop that <code>const</code> and it won't compile.</p>
+</div></section>
+
+<section id="t17"><h2>17. Static class members</h2>
+<p>A <code>static</code> data member belongs to the <b>class</b>, not to any object — one shared copy. A static method can only access static members, and is called with <code>Class::method()</code>.</p>
+<pre><code>// Player.h
+class Player {
+    static int num_players;
+public:
+    static int get_num_players();
+    Player(std::string name_val = "None", int health_val = 0, int xp_val = 0);
+    ~Player();
+};
+// Player.cpp
+int Player::num_players {0};          // define & init in .cpp
+Player::Player(std::string n, int h, int x) : name{n}, health{h}, xp{x} { ++num_players; }
+Player::~Player() { --num_players; }
+int Player::get_num_players() { return num_players; }
+
+// main
+cout &lt;&lt; Player::get_num_players();   // 0
+Player hero {"Hero"};                // 1
+Player *enemy = new Player("Enemy", 100, 100);   // 2
+delete enemy;                        // 1</code></pre>
+<h3>How big is an object?</h3>
+<ul>
+<li>An object holds only its <b>non-static data members</b>. Methods (code) and static members are shared, not stored per object.</li>
+<li>The compiler may insert <b>padding</b> for alignment, so <code>sizeof</code> can exceed the sum of members.</li>
+<li>An empty class still has <code>sizeof</code> ≥ 1 so each object has a distinct address.</li>
+</ul>
+<pre><code>struct A { char c; int i; char d; };   // typically sizeof = 12
+struct B { int i; char c; char d; };   // typically sizeof = 8 (reordered → less padding)
+class Empty {};                        // sizeof = 1</code></pre>
+<div class="ex">
+<div class="ex-title">▶ Complete Example &amp; Output</div>
+<pre><code>class Player {
+    string name;
+    static int num_players;
+public:
+    Player(string n) : name{n} { ++num_players; }
+    ~Player() { --num_players; }
+    static int count() { return num_players; }
+};
+int Player::num_players {0};
+
+int main() {
+    cout &lt;&lt; Player::count() &lt;&lt; endl;
+    Player a {"A"};
+    {
+        Player b {"B"};
+        cout &lt;&lt; Player::count() &lt;&lt; endl;
+    }                                   // b destroyed here
+    cout &lt;&lt; Player::count() &lt;&lt; endl;
+    Player *e = new Player {"E"};
+    cout &lt;&lt; Player::count() &lt;&lt; endl;
+    delete e;
+    cout &lt;&lt; Player::count() &lt;&lt; endl;
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">0
+2
+1
+2
+1</pre>
+<p class="ex-why"><b>Why this output:</b> <code>num_players</code> exists <b>once</b>, shared by all objects: up on construction, down on destruction.</p>
+</div></section>
+
+<section id="t18"><h2>18. struct vs class</h2>
+<p>Identical except for the default access: <code>struct</code> members are <b>public</b> by default, <code>class</code> members are <b>private</b>. Convention: use <code>struct</code> for passive data (no invariants), <code>class</code> for objects with behavior and private data.</p>
+<pre><code>struct Person { std::string name; std::string get_name(); };
+Person p; p.name = "Frank";   // ✅ public
+class Person2 { std::string name; };
+Person2 q; q.name = "Frank";  // ❌ private</code></pre>
+<div class="ex">
+<div class="ex-title">▶ Complete Example &amp; Output</div>
+<pre><code>struct Point { int x; int y; };
+
+class Point2 {
+    int x {1};
+    int y {2};
+public:
+    int get_x() const { return x; }
+};
+
+int main() {
+    Point p {3, 4};
+    p.x = 10;
+    cout &lt;&lt; p.x &lt;&lt; ", " &lt;&lt; p.y &lt;&lt; endl;
+    Point2 q;
+    cout &lt;&lt; q.get_x() &lt;&lt; endl;
+    // q.x = 5;   // compile error: private
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">10, 4
+1</pre>
+<p class="ex-why"><b>Why this output:</b> <code>struct</code> is public by default, so <code>p.x</code> is assignable; <code>class</code> is private by default, so you go through a getter.</p>
+</div></section>
+
+<section id="t19"><h2>19. Friends of a class</h2>
+<p>A <b>friend</b> is a function or class granted access to private members. Friendship is <b>granted, not taken</b>; it is <b>not symmetric</b>, <b>not transitive</b>, and <b>not inherited</b>.</p>
+<pre><code>class Player {
+    friend void display_player(Player &amp;p);                // non-member function
+    friend void Other_class::display_player(Player &amp;p);   // a member of another class
+    friend class Friend_class;                            // whole class
+private:
+    std::string name; int health; int xp;
+};
+void display_player(Player &amp;p) { cout &lt;&lt; p.name; }   // can access private
+void Friend_class::set_hero_name(Player &amp;p, std::string name) { p.name = name; }</code></pre>
+<div class="warn">Use friends sparingly — they weaken encapsulation. Common legit use: overloading <code>operator&lt;&lt;</code>.</div>
+<h3>A good use of friend: <code>operator&lt;&lt;</code></h3>
+<pre><code>class Player {
+    std::string name; int health;
+public:
+    Player(std::string n, int h) : name{n}, health{h} {}
+    friend std::ostream &amp;operator&lt;&lt;(std::ostream &amp;os, const Player &amp;p) {
+        return os &lt;&lt; "[" &lt;&lt; p.name &lt;&lt; ": " &lt;&lt; p.health &lt;&lt; "]";
+    }
+};
+Player hero {"Hero", 100};
+std::cout &lt;&lt; hero &lt;&lt; '\n';   // [Hero: 100]</code></pre>
+<p>It must be a non-member because the left operand is <code>std::ostream</code>, not <code>Player</code>. More in Section 14.</p>
+<div class="ex">
+<div class="ex-title">▶ Complete Example &amp; Output</div>
+<pre><code>class Player {
+    friend void display(const Player &amp;p);
+    string name;
+    int health;
+public:
+    Player(string n, int h) : name{n}, health{h} { }
+};
+
+void display(const Player &amp;p) {
+    cout &lt;&lt; p.name &lt;&lt; " (" &lt;&lt; p.health &lt;&lt; " hp)" &lt;&lt; endl;
+}
+
+int main() {
+    Player hero {"Hero", 100};
+    display(hero);
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Hero (100 hp)</pre>
+<p class="ex-why"><b>Why this output:</b> <code>display</code> isn't a member, yet it reads private <code>name</code> and <code>health</code> because the class declared it a <code>friend</code>.</p>
+</div></section>
+
+<section id="t20"><h2>20. Section Challenge – Movies</h2>
+<p>Build two classes:</p>
+<ul><li><b>Movie</b>: <code>name</code>, <code>rating</code> (G, PG, PG-13, R), <code>watched</code>. Constructor, copy constructor, destructor, const getters, setters, <code>increment_watched()</code>, <code>display() const</code>.</li>
+<li><b>Movies</b>: holds <code>std::vector&lt;Movie&gt;</code>. <code>bool add_movie(name, rating, watched)</code> – false if the name already exists; <code>bool increment_watched(name)</code> – false if not found; <code>display() const</code> – prints all, or "Sorry, no movies to display" if empty.</li></ul>
+<pre><code>bool Movies::add_movie(std::string name, std::string rating, int watched) {
+    for (const Movie &amp;movie : movies)
+        if (movie.get_name() == name) return false;
+    Movie temp {name, rating, watched};
+    movies.push_back(temp);
+    return true;
+}
+bool Movies::increment_watched(std::string name) {
+    for (Movie &amp;movie : movies)            // note: non-const reference
+        if (movie.get_name() == name) { movie.increment_watched(); return true; }
+    return false;
+}</code></pre>
+<p>Practice: <code>practice/ex08_movies_challenge.cpp</code>.</p>
+<div class="ex">
+<div class="ex-title">▶ Complete Example &amp; Output</div>
+<pre><code>class Movie {
+    string name, rating;
+    int watched;
+public:
+    Movie(string n, string r, int w) : name{n}, rating{r}, watched{w} { }
+    string get_name() const { return name; }
+    void increment_watched() { ++watched; }
+    void display() const { cout &lt;&lt; name &lt;&lt; ", " &lt;&lt; rating &lt;&lt; ", " &lt;&lt; watched &lt;&lt; endl; }
+};
+
+class Movies {
+    vector&lt;Movie&gt; movies;
+public:
+    bool add_movie(string n, string r, int w) {
+        for (const Movie &amp;m : movies)
+            if (m.get_name() == n) return false;
+        movies.emplace_back(n, r, w);
+        return true;
+    }
+    bool increment_watched(string n) {
+        for (Movie &amp;m : movies)
+            if (m.get_name() == n) { m.increment_watched(); return true; }
+        return false;
+    }
+    void display() const {
+        if (movies.empty()) { cout &lt;&lt; "Sorry, no movies to display" &lt;&lt; endl; return; }
+        for (const Movie &amp;m : movies) m.display();
+    }
+};
+
+int main() {
+    Movies my;
+    my.display();
+    cout &lt;&lt; boolalpha;
+    cout &lt;&lt; my.add_movie("Big", "PG-13", 2) &lt;&lt; endl;
+    cout &lt;&lt; my.add_movie("Star Wars", "PG", 5) &lt;&lt; endl;
+    cout &lt;&lt; my.add_movie("Big", "PG-13", 3) &lt;&lt; endl;
+    my.increment_watched("Big");
+    cout &lt;&lt; my.increment_watched("XXX") &lt;&lt; endl;
+    my.display();
+}</code></pre>
+<div class="out-lbl">Output</div>
+<pre class="out">Sorry, no movies to display
+true
+true
+false
+false
+Big, PG-13, 3
+Star Wars, PG, 5</pre>
+<p class="ex-why"><b>Why this output:</b> A compact runnable version of the challenge: adding a duplicate returns <code>false</code>, incrementing an unknown movie also returns <code>false</code>.</p>
+</div></section>
+
+<section id="sum"><h2>✅ Summary</h2><h3>Common mistakes checklist</h3>
+<ul>
+<li>Forgetting <code>;</code> after the class closing brace.</li>
+<li>Repeating default arguments in the .cpp definition → compile error.</li>
+<li>Defining static data in the header → multiple-definition linker error (or use <code>inline static int n {0};</code> in C++17).</li>
+<li>Copy ctor taking parameter by value → infinite recursion / compile error.</li>
+<li>Forgetting <code>src.data = nullptr</code> in move ctor → double free.</li>
+<li>Missing <code>const</code> on getters → can't use with <code>const&amp;</code> parameters.</li>
+<li>Using <code>delete</code> instead of <code>delete[]</code> for arrays.</li>
+<li>Range-for with <code>const Movie &amp;</code> when you need to modify → compile error; with <code>Movie</code> (by value) → modifies a copy silently!</li>
+<li><code>Player p();</code> declares a <b>function</b>, not an object ("most vexing parse"). Use <code>Player p;</code> or <code>Player p{};</code>.</li>
+</ul><table>
+<tr><th>Concept</th><th>Key syntax</th></tr>
+<tr><td>Scope resolution</td><td><code>void Account::deposit(double a) {...}</code></td></tr>
+<tr><td>Init list</td><td><code>: name{n}, hp{h}</code></td></tr>
+<tr><td>Delegating</td><td><code>Player() : Player{"None",0,0} {}</code></td></tr>
+<tr><td>Copy ctor</td><td><code>T(const T &amp;src)</code></td></tr>
+<tr><td>Move ctor</td><td><code>T(T &amp;&amp;src) noexcept</code> + <code>src.ptr = nullptr</code></td></tr>
+<tr><td>Destructor</td><td><code>~T()</code></td></tr>
+<tr><td>const method</td><td><code>int get() const</code></td></tr>
+<tr><td>static</td><td><code>static int n;</code> + <code>int T::n {0};</code></td></tr>
+<tr><td>friend</td><td><code>friend void f(T&amp;); friend class X;</code></td></tr></table>
+<p><a href="exercises_en.html"><button>Go to exercises →</button></a></p></section>
+</main></div></body></html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Section 13 Exercises (EN)</title><link rel="stylesheet" href="style.css"><script src="quiz.js"></script></head>
+<body><header><h1>📝 Section 13 – Exercises</h1><a href="index.html">Home</a><a href="lesson_en.html">← Lesson</a><a href="exercises_vi.html">🇻🇳 Tiếng Việt</a></header>
+<main style="max-width:1000px;margin:auto">
+<section><h2>Part A – Multiple choice (20)</h2>
+<div class="q" data-a="1" data-ex="class members are private by default."><b>1.</b> Default access of members in a <code>class</code>?<label>public</label><label>private</label><label>protected</label><label>friend</label></div>
+<div class="q" data-a="2" data-ex="struct defaults to public."><b>2.</b> The only difference between struct and class is:<label>struct cannot have methods</label><label>struct cannot have constructors</label><label>default access (struct = public)</label><label>struct is always on the heap</label></div>
+<div class="q" data-a="0" data-ex="Pointers use ->."><b>3.</b> Given <code>Account *p = new Account;</code> how do you call deposit?<label>p-&gt;deposit(10);</label><label>p.deposit(10);</label><label>*p.deposit(10);</label><label>&amp;p.deposit(10);</label></div>
+<div class="q" data-a="3" data-ex="Constructors have no return type, not even void."><b>4.</b> Which is TRUE about constructors?<label>They return void</label><label>A class can have only one</label><label>Must be called explicitly</label><label>Have no return type and can be overloaded</label></div>
+<div class="q" data-a="1" data-ex="Exactly one destructor, no params."><b>5.</b> How many destructors can a class have?<label>As many as needed</label><label>Exactly one</label><label>Zero</label><label>One per constructor</label></div>
+<div class="q" data-a="2" data-ex="Once any ctor is declared, no implicit default ctor."><b>6.</b> A class only declares <code>Account(std::string, double)</code>. <code>Account a;</code>:<label>Compiles, uses generated default ctor</label><label>Compiles with garbage values</label><label>Compiler error</label><label>Runtime error</label></div>
+<div class="q" data-a="0" data-ex="Declaration order in the class."><b>7.</b> Members in an initialization list are initialized in the order:<label>they are declared in the class</label><label>they appear in the list</label><label>alphabetical</label><label>random</label></div>
+<div class="q" data-a="1" data-ex="Delegated constructor body runs first."><b>8.</b> <code>Player() : Player{"None",0,0} { cout&lt;&lt;"B"; }</code> and 3-arg ctor prints "A". <code>Player p;</code> prints:<label>BA</label><label>AB</label><label>A</label><label>B</label></div>
+<div class="q" data-a="3" data-ex="Ambiguous: both match a no-arg call."><b>9.</b> Having both <code>Player()</code> and <code>Player(std::string n="None")</code>, then <code>Player p;</code> gives:<label>calls Player()</label><label>calls the string version</label><label>runtime error</label><label>ambiguous call compile error</label></div>
+<div class="q" data-a="2" data-ex="Pass by reference doesn't copy."><b>10.</b> Which does NOT call the copy constructor?<label>passing object by value</label><label>returning object by value</label><label>passing object by const reference</label><label><code>Player b {a};</code></label></div>
+<div class="q" data-a="1" data-ex="Must take a reference, otherwise infinite recursion."><b>11.</b> Correct copy constructor signature:<label>Player(Player source)</label><label>Player(const Player &amp;source)</label><label>Player(Player *source)</label><label>void Player(const Player&amp;)</label></div>
+<div class="q" data-a="0" data-ex="Both point to the same heap int."><b>12.</b> Shallow copy of a class with <code>int *data</code> means:<label>both objects' pointers point to the same memory</label><label>the int value is duplicated</label><label>the pointer is set to nullptr</label><label>nothing is copied</label></div>
+<div class="q" data-a="2" data-ex="Double delete / dangling pointer."><b>13.</b> Main danger of shallow copy with a destructor that deletes:<label>slower compile</label><label>memory leak only</label><label>dangling pointer & double free</label><label>none</label></div>
+<div class="q" data-a="3" data-ex="&& is an r-value reference."><b>14.</b> Move constructor signature:<label>Move(const Move &amp;src)</label><label>Move(Move src)</label><label>Move(Move *src)</label><label>Move(Move &amp;&amp;src) noexcept</label></div>
+<div class="q" data-a="1" data-ex="Otherwise the temp's destructor frees the stolen memory."><b>15.</b> In a move constructor, after stealing the pointer you must:<label>delete source.data</label><label>set source.data = nullptr</label><label>copy *source.data</label><label>call the destructor</label></div>
+<div class="q" data-a="0" data-ex="Move{10} is a temporary."><b>16.</b> Which is an r-value?<label><code>Move{10}</code></label><label><code>int x</code></label><label><code>vec[0]</code></label><label><code>*ptr</code></label></div>
+<div class="q" data-a="2" data-ex="this is a pointer to the current object."><b>17.</b> <code>this</code> is:<label>a reference to the class</label><label>a copy of the object</label><label>a pointer to the current object</label><label>a static member</label></div>
+<div class="q" data-a="3" data-ex="Const objects can only call const methods."><b>18.</b> <code>const Player v; v.get_name();</code> compiles only if:<label>get_name is static</label><label>get_name is public only</label><label>get_name returns const</label><label>get_name is declared <code>const</code></label></div>
+<div class="q" data-a="1" data-ex="Static data must be defined once in a .cpp."><b>19.</b> Where do you define/initialize <code>static int num_players;</code>?<label>inside the constructor</label><label>in the .cpp: <code>int Player::num_players {0};</code></label><label>in main</label><label>it's automatic, nowhere</label></div>
+<div class="q" data-a="0" data-ex="Friendship is granted, not symmetric, not transitive."><b>20.</b> If A is a friend of B, and B is a friend of C:<label>A is NOT automatically a friend of C</label><label>A is a friend of C</label><label>B is a friend of A</label><label>C is a friend of A</label></div>
+<button onclick="checkAll('✅ Correct.','❌ Answer:','Score')">Check answers</button><button onclick="resetAll()">Reset</button> <span id="score" class="score"></span>
+</section>
+
+<section><h2>Part B – Predict the output</h2>
+<h3>B1</h3><pre><code>class Player {
+    std::string name;
+public:
+    Player(std::string n) : name{n} { cout &lt;&lt; "C:" &lt;&lt; name &lt;&lt; " "; }
+    ~Player() { cout &lt;&lt; "D:" &lt;&lt; name &lt;&lt; " "; }
+};
+int main() {
+    Player a {"A"};
+    { Player b {"B"}; }
+    Player c {"C"};
+}</code></pre>
+<details><summary>Answer</summary><code>C:A C:B D:B C:C D:C D:A</code> — b dies at the end of its block; c and a are destroyed in reverse order.</details>
+
+<h3>B2</h3><pre><code>class P {
+public:
+    P(int x) { cout &lt;&lt; "int "; }
+    P() : P{0} { cout &lt;&lt; "none "; }
+    P(const P &amp;s) : P{} { cout &lt;&lt; "copy "; }
+};
+void f(P p) {}
+int main() { P a; f(a); }</code></pre>
+<details><summary>Answer</summary><code>int none int none copy</code> — <code>P a</code> → int, none. <code>f(a)</code> copies → delegates to P{} → int, none, then copy.</details>
+
+<h3>B3</h3><pre><code>class Player {
+    static int count;
+public:
+    Player() { ++count; }
+    ~Player() { --count; }
+    static int get() { return count; }
+};
+int Player::count {0};
+int main() {
+    Player a, b;
+    Player *p = new Player;
+    cout &lt;&lt; Player::get();
+    delete p;
+    { Player c; cout &lt;&lt; Player::get(); }
+    cout &lt;&lt; Player::get();
+}</code></pre>
+<details><summary>Answer</summary><code>332</code></details>
+
+<h3>B4 – Does it compile?</h3><pre><code>class Account {
+    double balance {0};
+public:
+    double get_balance() { return balance; }
+};
+void show(const Account &amp;a) { cout &lt;&lt; a.get_balance(); }</code></pre>
+<details><summary>Answer</summary>❌ No. <code>a</code> is const but <code>get_balance()</code> is not a const method. Fix: <code>double get_balance() const</code>.</details>
+</section>
+
+<section><h2>Part C – Coding tasks (files in <code>practice/</code>)</h2>
+<table><tr><th>#</th><th>File</th><th>Task</th></tr>
+<tr><td>1</td><td>ex01_bank_account.cpp</td><td>Class <code>Account</code> with private name/balance, deposit, withdraw (fail if insufficient), getters const.</td></tr>
+<tr><td>2</td><td>ex02_constructors.cpp</td><td><code>Rectangle</code> with init list + delegating constructors + default params, print which ctor runs.</td></tr>
+<tr><td>3</td><td>ex03_header_split/</td><td>Split <code>Student</code> into Student.h / Student.cpp / main.cpp with include guards.</td></tr>
+<tr><td>4</td><td>ex04_deep_copy.cpp</td><td><code>IntArray</code> holding <code>int*</code> of size n — write deep copy ctor + destructor.</td></tr>
+<tr><td>5</td><td>ex05_move.cpp</td><td>Add move ctor to <code>IntArray</code>, push temporaries into a vector, observe output.</td></tr>
+<tr><td>6</td><td>ex06_static_counter.cpp</td><td><code>Enemy</code> with static counter of live objects.</td></tr>
+<tr><td>7</td><td>ex07_friend.cpp</td><td><code>Point</code> + friend function <code>distance</code> and friend class <code>Debugger</code>.</td></tr>
+<tr><td>8</td><td>ex08_movies_challenge.cpp</td><td>The Section 13 Movies challenge (single file).</td></tr></table>
+<p>Compile: <code>g++ -std=c++17 -Wall ex01_bank_account.cpp -o ex01 &amp;&amp; ./ex01</code>. Solutions: <code>practice/solutions/</code>.</p>
+<details><summary>Hint – Task 4 deep copy</summary><pre><code>IntArray(const IntArray &amp;src) : size{src.size}, data{new int[src.size]} {
+    for (size_t i = 0; i &lt; size; ++i) data[i] = src.data[i];
+}
+~IntArray() { delete [] data; }</code></pre></details>
+<details><summary>Hint – Task 5 move</summary><pre><code>IntArray(IntArray &amp;&amp;src) noexcept : size{src.size}, data{src.data} {
+    src.data = nullptr; src.size = 0;
+}</code></pre></details>
+</section>
+</main></body></html>
